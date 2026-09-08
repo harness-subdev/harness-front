@@ -1,0 +1,4 @@
+interface:
+  display_name: "React Reference Architecture"
+  short_description: "Turn reference evidence into reusable React structure"
+  default_prompt: "Use $react-reference-architecture to convert the approved reference analysis into a reusable React and TypeScript architecture contract."

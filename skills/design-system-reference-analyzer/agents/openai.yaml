@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design System Reference Analyzer"
+  short_description: "Analyze references with source and GPU evidence"
+  default_prompt: "Use $design-system-reference-analyzer to choose the evidence mode, archive publicly served artifacts only when authorized, and analyze the reference source and GPU render contracts."

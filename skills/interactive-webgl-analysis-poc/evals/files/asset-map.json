@@ -1,0 +1,39 @@
+{
+  "target": "fictional Prism Current sequence",
+  "track": "behavior-only strict clean-room",
+  "assets": [
+    {
+      "id": "poster-original",
+      "kind": "user-provided image",
+      "width": 1200,
+      "height": 1800,
+      "role": "static and failure visual",
+      "loaded": true,
+      "observed_visible": true,
+      "license": "user confirms project use",
+      "replacement_required": false
+    },
+    {
+      "id": "motion-reference",
+      "kind": "public video URL",
+      "width": 1200,
+      "height": 1800,
+      "role": "motion reference only",
+      "loaded": true,
+      "observed_visible": "probable, not proven",
+      "license": "unknown",
+      "replacement_required": true
+    },
+    {
+      "id": "implementation-motion",
+      "kind": "new project-owned video",
+      "width": 1200,
+      "height": 1800,
+      "role": "POC moving media",
+      "loaded": false,
+      "observed_visible": false,
+      "license": "project-owned",
+      "replacement_required": false
+    }
+  ]
+}

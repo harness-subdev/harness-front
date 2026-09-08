@@ -1,0 +1,50 @@
+{
+  "source": "user-supplied sanitized network export",
+  "target": "https://public.example/aster-field",
+  "assets": [
+    {
+      "id": "field-poster",
+      "url": "https://cdn.public.example/aster/field-poster.webp",
+      "kind": "image/webp",
+      "width": 1600,
+      "height": 2000,
+      "requested_at_top": true,
+      "observed_visible": true,
+      "evidence": "recording still matches decoded image",
+      "license": "unknown",
+      "replacement_required": true
+    },
+    {
+      "id": "field-motion",
+      "url": "https://cdn.public.example/aster/field-motion.mp4",
+      "kind": "video/mp4",
+      "width": 1600,
+      "height": 2000,
+      "requested_at_top": true,
+      "observed_visible": "unverified",
+      "evidence": "network export only",
+      "license": "unknown",
+      "replacement_required": true
+    },
+    {
+      "id": "studio-model-full",
+      "url": "https://cdn.public.example/aster/studio-full.glb",
+      "kind": "model/gltf-binary",
+      "requested_at_top": true,
+      "observed_visible": false,
+      "evidence": "request only; no consumer evidence",
+      "license": "unknown",
+      "replacement_required": true
+    },
+    {
+      "id": "display-font",
+      "url": "https://cdn.public.example/aster/display.woff2",
+      "kind": "font/woff2",
+      "requested_at_top": true,
+      "observed_visible": true,
+      "evidence": "sanitized CSS family plus recording",
+      "license": "unknown",
+      "replacement_required": true
+    }
+  ]
+}

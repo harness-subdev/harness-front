@@ -1,0 +1,4 @@
+interface:
+  display_name: "Site Reference Audit"
+  short_description: "Analyze a public site route and its interaction system"
+  default_prompt: "Use $site-reference-audit to analyze this public website route before implementation."

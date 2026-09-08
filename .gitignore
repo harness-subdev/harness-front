@@ -1,0 +1,7 @@
+.DS_Store
+node_modules/
+
+# Reference research and replay artifacts never belong in this repository.
+source/
+.reference-reconstruction/
+component-catalog/
