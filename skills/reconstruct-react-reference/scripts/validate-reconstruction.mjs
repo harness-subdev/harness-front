@@ -5,7 +5,7 @@ import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export const STAGES = ['oracle', 'promotion', 'catalog', 'distribution'];
+export const STAGES = ['oracle', 'architecture', 'signature', 'promotion', 'catalog', 'distribution'];
 
 const SHA256 = /^[a-f0-9]{64}$/;
 const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
@@ -14,6 +14,14 @@ const PARITY_STATUSES = new Set(['unverified', 'parity-verified', 'stale']);
 const REUSE_STATUSES = new Set(['unproven', 'reuse-proven', 'stale']);
 const DISTRIBUTION_STATUSES = new Set(['private-only', 'distribution-validated', 'stale']);
 const DISTRIBUTION_RIGHTS = new Set(['owned', 'cc0', 'dependency-license', 'licensed']);
+const SURFACE_KINDS = new Set(['dom', 'svg', 'canvas2d', 'webgl', 'webgl2', 'webgpu']);
+const GPU_SURFACE_KINDS = new Set(['webgl', 'webgl2', 'webgpu']);
+const FORBIDDEN_COMPENSATION = [
+  'css-overlay',
+  'dom-overlay',
+  'screenshot-overlay',
+  'checkpoint-conditional',
+];
 const HOST_URL = /^[A-Za-z][A-Za-z0-9+.-]*:\/\//;
 
 function fail(message) {
@@ -47,10 +55,37 @@ function nonEmptyStrings(value, label) {
   return values;
 }
 
-function schema(value, label) {
+function schema(value, label, allowedVersions = [1]) {
   const record = object(value, label);
-  if (record.schemaVersion !== 1) fail(`${label}.schemaVersion must be 1`);
+  if (!allowedVersions.includes(record.schemaVersion)) {
+    fail(`${label}.schemaVersion must be ${allowedVersions.join(' or ')}`);
+  }
   return record;
+}
+
+function positiveNumber(value, label) {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    fail(`${label} must be a positive finite number`);
+  }
+  return value;
+}
+
+function nonNegativeNumber(value, label) {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    fail(`${label} must be a non-negative finite number`);
+  }
+  return value;
+}
+
+function viewport(value, label) {
+  const record = object(value, label);
+  exactKeys(record, ['width', 'height', 'dpr'], label);
+  for (const key of ['width', 'height']) {
+    positiveNumber(record[key], `${label}.${key}`);
+    if (!Number.isInteger(record[key])) fail(`${label}.${key} must be an integer`);
+  }
+  positiveNumber(record.dpr, `${label}.dpr`);
+  return { width: record.width, height: record.height, dpr: record.dpr };
 }
 
 function unique(values, label) {
@@ -58,6 +93,14 @@ function unique(values, label) {
   for (const value of values) {
     if (seen.has(value)) fail(`${label} contains duplicate ${value}`);
     seen.add(value);
+  }
+}
+
+function exactKeys(value, allowed, label) {
+  const actual = Object.keys(value).sort();
+  const expected = [...allowed].sort();
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    fail(`${label} fields must be exactly ${expected.join(', ')}`);
   }
 }
 
@@ -92,6 +135,12 @@ async function canonicalWithin(root, value, label) {
 
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const digestClaimSet = (claims) => digest(JSON.stringify([...claims].sort()));
+const canonicalize = (value) => Array.isArray(value)
+  ? value.map(canonicalize)
+  : value && typeof value === 'object'
+    ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]))
+    : value;
+const digestCanonicalJson = (value) => digest(JSON.stringify(canonicalize(value)));
 
 async function fileSetDigest(root, values, label) {
   const files = nonEmptyStrings(values, label);
@@ -187,7 +236,7 @@ async function validateOracle(root, oracleRoot) {
 }
 
 function validateComponentMap(value) {
-  const map = schema(value, 'component-map.json');
+  const map = schema(value, 'component-map.json', [2]);
   const components = array(map.components, 'component-map.json.components').map((entry, index) => {
     const component = object(entry, `component-map component ${index}`);
     const id = string(component.id, `component-map component ${index}.id`);
@@ -201,6 +250,414 @@ function validateComponentMap(value) {
   });
   unique(components.map(({ id }) => id), 'component-map component ids');
   return components;
+}
+
+async function validateArchitecture(root, value) {
+  const map = schema(value, 'component-map.json', [2]);
+  const architecture = object(map.architecture, 'component-map.json.architecture');
+  const architecturePath = string(architecture.path, 'component-map.json.architecture.path');
+  if (architecturePath !== '.reference-reconstruction/react-architecture.md') {
+    fail('component-map.json.architecture.path must be .reference-reconstruction/react-architecture.md');
+  }
+  if (architecture.status !== 'approved') {
+    fail('component-map.json.architecture.status must be approved');
+  }
+  const architectureFile = await bytesAt(root, architecturePath, 'component-map.json architecture');
+  exactHash(digest(architectureFile.bytes), architecture.sha256, 'component-map.json architecture');
+  return { path: architecturePath, sha256: digest(architectureFile.bytes) };
+}
+
+function nonNegativeInteger(value, label) {
+  nonNegativeNumber(value, label);
+  if (!Number.isInteger(value)) fail(`${label} must be an integer`);
+  return value;
+}
+
+function positiveInteger(value, label) {
+  positiveNumber(value, label);
+  if (!Number.isInteger(value)) fail(`${label} must be an integer`);
+  return value;
+}
+
+function validateCapture(value, label) {
+  const capture = object(value, label);
+  exactKeys(
+    capture,
+    ['inputMode', 'state', 'readiness', 'reducedMotion', 'timeControl', 'randomnessControl'],
+    label,
+  );
+  for (const key of ['inputMode', 'state', 'readiness', 'timeControl', 'randomnessControl']) {
+    string(capture[key], `${label}.${key}`);
+  }
+  if (typeof capture.reducedMotion !== 'boolean') fail(`${label}.reducedMotion must be boolean`);
+  return capture;
+}
+
+function validateGpuContract(value, kind, label) {
+  const contract = object(value, label);
+  const context = object(contract.context, `${label}.context`);
+  exactKeys(context, ['api', 'version'], `${label}.context`);
+  if (context.api !== kind) fail(`${label}.context.api must be ${kind}`);
+  string(context.version, `${label}.context.version`);
+  const commonKeys = ['context', 'shaderCount', 'passOrder', 'textureCount'];
+  if (kind === 'webgpu') {
+    exactKeys(contract, [...commonKeys, 'pipelineCount', 'attachmentCount'], label);
+    positiveInteger(contract.pipelineCount, `${label}.pipelineCount`);
+    nonNegativeInteger(contract.attachmentCount, `${label}.attachmentCount`);
+  } else {
+    exactKeys(contract, [...commonKeys, 'programCount', 'framebufferCount'], label);
+    positiveInteger(contract.programCount, `${label}.programCount`);
+    nonNegativeInteger(contract.framebufferCount, `${label}.framebufferCount`);
+  }
+  positiveInteger(contract.shaderCount, `${label}.shaderCount`);
+  nonNegativeInteger(contract.textureCount, `${label}.textureCount`);
+  nonEmptyStrings(contract.passOrder, `${label}.passOrder`);
+  return contract;
+}
+
+function validateDesktopSignaturePolicy(root, value, components) {
+  const policy = object(value, 'component-map.json.desktopSignature.policy');
+  exactKeys(
+    policy,
+    ['route', 'viewport', 'exactFidelity', 'forbiddenCompensation', 'checkpoints'],
+    'component-map.json.desktopSignature.policy',
+  );
+  const route = string(policy.route, 'component-map.json.desktopSignature.policy.route');
+  if (!route.startsWith('/')) fail('component-map.json.desktopSignature.policy.route must begin with /');
+  viewport(policy.viewport, 'component-map.json.desktopSignature.policy.viewport');
+  if (policy.exactFidelity !== true) {
+    fail('component-map.json.desktopSignature.policy.exactFidelity must be true');
+  }
+  const forbidden = nonEmptyStrings(
+    policy.forbiddenCompensation,
+    'component-map.json.desktopSignature.policy.forbiddenCompensation',
+  );
+  if (JSON.stringify([...forbidden].sort()) !== JSON.stringify([...FORBIDDEN_COMPENSATION].sort())) {
+    fail(`component-map.json.desktopSignature.policy.forbiddenCompensation must contain exactly ${FORBIDDEN_COMPENSATION.join(', ')}`);
+  }
+  const componentById = new Map(components.map((component) => [component.id, component]));
+  const checkpoints = array(policy.checkpoints, 'component-map.json.desktopSignature.policy.checkpoints');
+  if (!checkpoints.length) fail('component-map.json.desktopSignature.policy.checkpoints must not be empty');
+  const checkpointIds = [];
+  const surfaceDefinitions = new Map();
+  for (const [checkpointIndex, checkpointValue] of checkpoints.entries()) {
+    const label = `component-map.json.desktopSignature.policy.checkpoints[${checkpointIndex}]`;
+    const checkpoint = object(checkpointValue, label);
+    exactKeys(checkpoint, ['id', 'componentId', 'claimId', 'capture', 'surfaces', 'comparison'], label);
+    const checkpointId = string(checkpoint.id, `${label}.id`);
+    checkpointIds.push(checkpointId);
+    const componentId = string(checkpoint.componentId, `${label}.componentId`);
+    const component = componentById.get(componentId);
+    if (!component) fail(`${label}.componentId does not name a component-map component`);
+    if (component.unresolved.length) {
+      fail(`desktop signature component ${component.id} has unresolved items and cannot close unresolved component claims`);
+    }
+    const claimId = string(checkpoint.claimId, `${label}.claimId`);
+    if (!component.evidenceClaims.includes(claimId)) {
+      fail(`${label}.claimId is not a current evidence claim for ${componentId}`);
+    }
+    validateCapture(checkpoint.capture, `${label}.capture`);
+
+    const surfaces = array(checkpoint.surfaces, `${label}.surfaces`);
+    if (!surfaces.length) fail(`${label}.surfaces must not be empty`);
+    const surfaceIds = [];
+    for (const [surfaceIndex, surfaceValue] of surfaces.entries()) {
+      const surfaceLabel = `${label}.surfaces[${surfaceIndex}]`;
+      const surface = object(surfaceValue, surfaceLabel);
+      const id = string(surface.id, `${surfaceLabel}.id`);
+      surfaceIds.push(id);
+      const kind = string(surface.kind, `${surfaceLabel}.kind`);
+      if (!SURFACE_KINDS.has(kind)) fail(`${surfaceLabel}.kind has invalid surface kind ${kind}`);
+      const rootOwner = string(surface.rootOwner, `${surfaceLabel}.rootOwner`);
+      const implementationFiles = nonEmptyStrings(surface.implementationFiles, `${surfaceLabel}.implementationFiles`);
+      unique(implementationFiles, `${surfaceLabel}.implementationFiles`);
+      implementationFiles.forEach((file, fileIndex) => relativePath(root, file, `${surfaceLabel}.implementationFiles[${fileIndex}]`));
+      if (!implementationFiles.includes(rootOwner)) fail(`${surfaceLabel}.rootOwner must be included in implementationFiles`);
+      relativePath(root, rootOwner, `${surfaceLabel}.rootOwner`);
+      if (GPU_SURFACE_KINDS.has(kind)) {
+        exactKeys(surface, ['id', 'kind', 'rootOwner', 'implementationFiles', 'gpuContract'], surfaceLabel);
+        validateGpuContract(surface.gpuContract, kind, `${surfaceLabel}.gpuContract`);
+      } else {
+        exactKeys(surface, ['id', 'kind', 'rootOwner', 'implementationFiles'], surfaceLabel);
+      }
+      const definition = canonicalize({
+        componentId,
+        kind,
+        rootOwner,
+        implementationFiles,
+        gpuContract: surface.gpuContract,
+      });
+      const previous = surfaceDefinitions.get(id);
+      if (previous && JSON.stringify(previous) !== JSON.stringify(definition)) {
+        fail(`desktop signature surface ${id} changes definition across checkpoints`);
+      }
+      surfaceDefinitions.set(id, definition);
+    }
+    unique(surfaceIds, `${label}.surface ids`);
+
+    const comparison = object(checkpoint.comparison, `${label}.comparison`);
+    exactKeys(comparison, ['method', 'tolerance', 'metrics'], `${label}.comparison`);
+    string(comparison.method, `${label}.comparison.method`);
+    string(comparison.tolerance, `${label}.comparison.tolerance`);
+    const metrics = array(comparison.metrics, `${label}.comparison.metrics`);
+    if (!metrics.length) fail(`${label}.comparison.metrics must not be empty`);
+    const metricNames = [];
+    for (const [metricIndex, metricValue] of metrics.entries()) {
+      const metricLabel = `${label}.comparison.metrics[${metricIndex}]`;
+      const metric = object(metricValue, metricLabel);
+      exactKeys(metric, ['name', 'maximum', 'unit'], metricLabel);
+      metricNames.push(string(metric.name, `${metricLabel}.name`));
+      nonNegativeNumber(metric.maximum, `${metricLabel}.maximum`);
+      string(metric.unit, `${metricLabel}.unit`);
+    }
+    unique(metricNames, `${label}.comparison metric names`);
+  }
+  unique(checkpointIds, 'component-map.json.desktopSignature.policy checkpoint ids');
+  return policy;
+}
+
+async function validateArchitectureStage(root) {
+  const mapFile = await jsonAt(root, '.reference-reconstruction/component-map.json', 'component-map.json');
+  const rawMap = object(mapFile.value, 'component-map.json');
+  if (rawMap.schemaVersion === 1) {
+    fail('component-map.json schemaVersion 1 is legacy; oracle validation remains available, but migrate component-map.json to schemaVersion 2 before architecture and later gates');
+  }
+  schema(rawMap, 'component-map.json', [2]);
+  const architecture = await validateArchitecture(root, rawMap);
+  const components = validateComponentMap(rawMap);
+  const signatureApproval = object(rawMap.desktopSignature, 'component-map.json.desktopSignature');
+  exactKeys(signatureApproval, ['status', 'sha256', 'policy'], 'component-map.json.desktopSignature');
+  if (signatureApproval.status !== 'approved') {
+    fail('component-map.json.desktopSignature.status must be approved');
+  }
+  const signaturePolicy = validateDesktopSignaturePolicy(root, signatureApproval.policy, components);
+  const signaturePolicyDigest = digestCanonicalJson(signaturePolicy);
+  exactHash(signaturePolicyDigest, signatureApproval.sha256, 'component-map.json approved desktop signature policy');
+  return {
+    mapFile,
+    architecture,
+    components,
+    signaturePolicy,
+    signaturePolicyDigest,
+  };
+}
+
+async function validateHashedOutputs(root, value, label) {
+  const outputs = array(value, label);
+  if (!outputs.length) fail(`${label} must not be empty`);
+  const paths = [];
+  const physicalFiles = [];
+  const records = [];
+  for (const [index, outputValue] of outputs.entries()) {
+    const outputLabel = `${label}[${index}]`;
+    const output = object(outputValue, outputLabel);
+    exactKeys(output, ['path', 'sha256'], outputLabel);
+    const outputPath = string(output.path, `${outputLabel}.path`);
+    paths.push(outputPath);
+    const source = await bytesAt(root, outputPath, `${outputLabel}.path`);
+    exactHash(digest(source.bytes), output.sha256, outputLabel);
+    physicalFiles.push(source.file);
+    records.push({ path: outputPath, file: source.file, sha256: output.sha256 });
+  }
+  unique(paths, `${label} paths`);
+  unique(physicalFiles, `${label} physical files`);
+  return records;
+}
+
+function validateGpuEntries(value, count, stateKey, passingValue, label, failureNoun) {
+  const entries = array(value, label);
+  if (entries.length !== count) fail(`${label} count mismatch: expected ${count}, received ${entries.length}`);
+  const ids = [];
+  for (const [index, entryValue] of entries.entries()) {
+    const entryLabel = `${label}[${index}]`;
+    const entry = object(entryValue, entryLabel);
+    exactKeys(entry, ['id', stateKey], entryLabel);
+    const id = string(entry.id, `${entryLabel}.id`);
+    ids.push(id);
+    if (entry[stateKey] !== passingValue) {
+      const failure = stateKey === 'compiled'
+        ? 'did not compile'
+        : stateKey === 'linked'
+          ? 'did not link'
+          : stateKey === 'ready'
+            ? 'is not ready'
+            : 'is not complete';
+      fail(`${failureNoun} ${id} ${failure}`);
+    }
+  }
+  unique(ids, `${label} ids`);
+}
+
+async function validateGpuStatus(root, checkpointId, policySurface, receiptSurface, label) {
+  const binding = object(receiptSurface.gpuStatus, `${label}.gpuStatus`);
+  exactKeys(binding, ['path', 'sha256'], `${label}.gpuStatus`);
+  if (!string(binding.path, `${label}.gpuStatus.path`).endsWith('.json')) {
+    fail(`${label}.gpuStatus.path must name a JSON file`);
+  }
+  const statusFile = await jsonAt(root, binding.path, `${label} GPU status`);
+  exactHash(digest(statusFile.bytes), binding.sha256, `${label}.gpuStatus`);
+  const status = schema(statusFile.value, `${label} GPU status`, [2]);
+  if (status.checkpointId !== checkpointId) fail(`${label} GPU status checkpointId must be ${checkpointId}`);
+  if (status.surfaceId !== policySurface.id) fail(`${label} GPU status surfaceId must be ${policySurface.id}`);
+  const contract = policySurface.gpuContract;
+  const context = object(status.context, `${label} GPU status.context`);
+  exactKeys(context, ['api', 'version'], `${label} GPU status.context`);
+  if (context.api !== contract.context.api) fail(`${label} GPU status context api mismatch`);
+  if (context.version !== contract.context.version) fail(`${label} GPU status context version mismatch`);
+  if (policySurface.kind === 'webgpu') {
+    exactKeys(
+      status,
+      ['schemaVersion', 'checkpointId', 'surfaceId', 'context', 'shaders', 'pipelines', 'attachments', 'passOrder', 'textures', 'draws', 'errors'],
+      `${label} GPU status`,
+    );
+    validateGpuEntries(status.shaders, contract.shaderCount, 'compiled', true, `${label} GPU status.shaders`, 'shader');
+    validateGpuEntries(status.pipelines, contract.pipelineCount, 'ready', true, `${label} GPU status.pipelines`, 'pipeline');
+    validateGpuEntries(status.attachments, contract.attachmentCount, 'complete', true, `${label} GPU status.attachments`, 'attachment');
+  } else {
+    exactKeys(
+      status,
+      ['schemaVersion', 'checkpointId', 'surfaceId', 'context', 'shaders', 'programs', 'framebuffers', 'passOrder', 'textures', 'draws', 'errors'],
+      `${label} GPU status`,
+    );
+    validateGpuEntries(status.shaders, contract.shaderCount, 'compiled', true, `${label} GPU status.shaders`, 'shader');
+    validateGpuEntries(status.programs, contract.programCount, 'linked', true, `${label} GPU status.programs`, 'program');
+    validateGpuEntries(
+      status.framebuffers,
+      contract.framebufferCount,
+      'status',
+      'FRAMEBUFFER_COMPLETE',
+      `${label} GPU status.framebuffers`,
+      'framebuffer',
+    );
+  }
+  if (JSON.stringify(status.passOrder) !== JSON.stringify(contract.passOrder)) {
+    fail(`${label} GPU status passOrder mismatch`);
+  }
+  validateGpuEntries(status.textures, contract.textureCount, 'ready', true, `${label} GPU status.textures`, 'texture');
+  if (!Number.isInteger(status.draws) || status.draws <= 0) fail(`${label} GPU status draws must be greater than zero`);
+  const errors = array(status.errors, `${label} GPU status.errors`);
+  if (errors.length) fail(`${label} GPU status errors must be empty`);
+  return statusFile.file;
+}
+
+async function validateDesktopSignature(root, architectureState, oracleLockSha256) {
+  const receiptFile = await jsonAt(
+    root,
+    '.reference-reconstruction/receipts/desktop-signature.json',
+    'desktop signature receipt',
+  );
+  const receipt = schema(receiptFile.value, 'desktop signature receipt', [2]);
+  exactKeys(receipt, ['schemaVersion', 'profile', 'bindings', 'route', 'viewport', 'checkpoints'], 'desktop signature receipt');
+  if (receipt.profile !== 'desktop-signature') {
+    fail('desktop signature receipt.profile must be desktop-signature');
+  }
+  const bindings = object(receipt.bindings, 'desktop signature receipt.bindings');
+  exactKeys(bindings, ['oracleLockSha256', 'architectureSha256', 'signaturePolicyDigest'], 'desktop signature receipt.bindings');
+  const expectedBindings = {
+    oracleLockSha256,
+    architectureSha256: architectureState.architecture.sha256,
+    signaturePolicyDigest: architectureState.signaturePolicyDigest,
+  };
+  for (const [key, expected] of Object.entries(expectedBindings)) {
+    if (!SHA256.test(bindings[key] ?? '')) {
+      fail(`desktop signature receipt.bindings.${key} must be a lowercase sha256`);
+    }
+    if (bindings[key] !== expected) fail(`stale desktop signature receipt: ${key} mismatch`);
+  }
+  if (receipt.route !== architectureState.signaturePolicy.route) {
+    fail('desktop signature receipt.route does not match the approved policy');
+  }
+  const receiptViewport = viewport(receipt.viewport, 'desktop signature receipt.viewport');
+  if (JSON.stringify(receiptViewport) !== JSON.stringify(architectureState.signaturePolicy.viewport)) {
+    fail('desktop signature receipt.viewport does not match the approved policy');
+  }
+
+  const policyCheckpoints = architectureState.signaturePolicy.checkpoints;
+  const receiptCheckpoints = array(receipt.checkpoints, 'desktop signature receipt.checkpoints');
+  const policyIds = policyCheckpoints.map(({ id }) => id);
+  const receiptIds = receiptCheckpoints.map((value, index) => string(object(value, `desktop signature receipt.checkpoints[${index}]`).id, `desktop signature receipt.checkpoints[${index}].id`));
+  if (JSON.stringify(receiptIds) !== JSON.stringify(policyIds)) {
+    fail(`desktop signature checkpoint IDs and order must exactly match ${policyIds.join(', ')}`);
+  }
+  for (const [checkpointIndex, policyCheckpoint] of policyCheckpoints.entries()) {
+    const label = `desktop signature receipt.checkpoints[${checkpointIndex}]`;
+    const receiptCheckpoint = object(receiptCheckpoints[checkpointIndex], label);
+    exactKeys(receiptCheckpoint, ['id', 'capture', 'surfaces', 'comparison', 'compensationObserved'], label);
+    const receiptCapture = validateCapture(receiptCheckpoint.capture, `${label}.capture`);
+    if (JSON.stringify(canonicalize(receiptCapture)) !== JSON.stringify(canonicalize(policyCheckpoint.capture))) {
+      fail(`${label}.capture does not match the approved policy`);
+    }
+
+    const policySurfaces = policyCheckpoint.surfaces;
+    const receiptSurfaces = array(receiptCheckpoint.surfaces, `${label}.surfaces`);
+    const policySurfaceIds = policySurfaces.map(({ id }) => id);
+    const receiptSurfaceIds = receiptSurfaces.map((value, index) => string(object(value, `${label}.surfaces[${index}]`).id, `${label}.surfaces[${index}].id`));
+    if (JSON.stringify(receiptSurfaceIds) !== JSON.stringify(policySurfaceIds)) {
+      fail(`${label} surface IDs and order must exactly match ${policySurfaceIds.join(', ')}`);
+    }
+    for (const [surfaceIndex, policySurface] of policySurfaces.entries()) {
+      const surfaceLabel = `${label}.surfaces[${surfaceIndex}]`;
+      const receiptSurface = object(receiptSurfaces[surfaceIndex], surfaceLabel);
+      const expectedKeys = GPU_SURFACE_KINDS.has(policySurface.kind)
+        ? ['id', 'kind', 'rootOwner', 'implementationFiles', 'implementationDigest', 'gpuStatus']
+        : ['id', 'kind', 'rootOwner', 'implementationFiles', 'implementationDigest'];
+      exactKeys(receiptSurface, expectedKeys, surfaceLabel);
+      if (receiptSurface.kind !== policySurface.kind) {
+        fail(`${surfaceLabel} surface ${policySurface.id} kind must remain ${policySurface.kind}`);
+      }
+      if (receiptSurface.rootOwner !== policySurface.rootOwner) {
+        fail(`${surfaceLabel} surface ${policySurface.id} rootOwner must match the approved policy`);
+      }
+      if (JSON.stringify(receiptSurface.implementationFiles) !== JSON.stringify(policySurface.implementationFiles)) {
+        fail(`${surfaceLabel} surface ${policySurface.id} implementationFiles must match the approved policy`);
+      }
+      const implementationState = await fileSetDigest(root, receiptSurface.implementationFiles, `${surfaceLabel}.implementationFiles`);
+      exactHash(implementationState.digest, receiptSurface.implementationDigest, `${surfaceLabel}.implementationDigest`);
+      if (GPU_SURFACE_KINDS.has(policySurface.kind)) {
+        await validateGpuStatus(root, policyCheckpoint.id, policySurface, receiptSurface, surfaceLabel);
+      }
+    }
+
+    const policyComparison = policyCheckpoint.comparison;
+    const receiptComparison = object(receiptCheckpoint.comparison, `${label}.comparison`);
+    exactKeys(
+      receiptComparison,
+      ['method', 'metrics', 'referenceOutputs', 'targetOutputs', 'evidenceOutputs'],
+      `${label}.comparison`,
+    );
+    if (receiptComparison.method !== policyComparison.method) {
+      fail(`${label}.comparison.method does not match the approved policy`);
+    }
+    const receiptMetrics = array(receiptComparison.metrics, `${label}.comparison.metrics`);
+    const policyMetricNames = policyComparison.metrics.map(({ name }) => name);
+    const receiptMetricNames = receiptMetrics.map((value, index) => string(object(value, `${label}.comparison.metrics[${index}]`).name, `${label}.comparison.metrics[${index}].name`));
+    if (JSON.stringify(receiptMetricNames) !== JSON.stringify(policyMetricNames)) {
+      fail(`${label}.comparison metric IDs and order must match the approved policy`);
+    }
+    for (const [metricIndex, policyMetric] of policyComparison.metrics.entries()) {
+      const metricLabel = `${label}.comparison.metrics[${metricIndex}]`;
+      const receiptMetric = object(receiptMetrics[metricIndex], metricLabel);
+      exactKeys(receiptMetric, ['name', 'observed', 'unit'], metricLabel);
+      nonNegativeNumber(receiptMetric.observed, `${metricLabel}.observed`);
+      if (receiptMetric.unit !== policyMetric.unit) fail(`${metricLabel}.unit does not match the approved policy`);
+      if (receiptMetric.observed > policyMetric.maximum) {
+        fail(`${label} metric ${policyMetric.name} exceeds its approved maximum`);
+      }
+    }
+    const referenceOutputs = await validateHashedOutputs(root, receiptComparison.referenceOutputs, `${label}.comparison.referenceOutputs`);
+    const targetOutputs = await validateHashedOutputs(root, receiptComparison.targetOutputs, `${label}.comparison.targetOutputs`);
+    await validateHashedOutputs(root, receiptComparison.evidenceOutputs, `${label}.comparison.evidenceOutputs`);
+    const referenceFiles = new Set(referenceOutputs.map(({ file }) => file));
+    if (targetOutputs.some(({ file }) => referenceFiles.has(file))) {
+      fail(`${label}.comparison reference and target outputs must be distinct physical files`);
+    }
+    const compensationObserved = strings(receiptCheckpoint.compensationObserved, `${label}.compensationObserved`);
+    unique(compensationObserved, `${label}.compensationObserved`);
+    if (compensationObserved.length) {
+      fail(`${label} observed forbidden compensation ${compensationObserved[0]}`);
+    }
+  }
+  return { path: '.reference-reconstruction/receipts/desktop-signature.json', sha256: digest(receiptFile.bytes) };
 }
 
 function validateClaimSets(receipt, component) {
@@ -294,9 +751,8 @@ async function validateReuseReceipt(root, projectId, promotion) {
   return { path: receiptPath, sha256: digest(receiptFile.bytes) };
 }
 
-async function validatePromotion(root, projectId, oracleLockSha256) {
-  const mapFile = await jsonAt(root, '.reference-reconstruction/component-map.json', 'component-map.json');
-  const components = validateComponentMap(mapFile.value);
+async function validatePromotion(root, projectId, oracleLockSha256, architectureState) {
+  const components = architectureState.components;
   const promotionFile = await jsonAt(root, '.reference-reconstruction/promotion.json', 'promotion.json');
   const promotionDocument = schema(promotionFile.value, 'promotion.json');
   const promotions = array(promotionDocument.components, 'promotion.json.components').map((entry, index) => {
@@ -544,10 +1000,21 @@ export async function validateReconstruction(root, stage = 'catalog') {
   const oracleState = await validateOracle(targetRoot, projectState.oracleRoot);
   if (stage === 'oracle') return { stage, componentCount: 0 };
 
+  const architectureState = await validateArchitectureStage(targetRoot);
+  if (stage === 'architecture') {
+    return { stage, componentCount: architectureState.components.length };
+  }
+
+  await validateDesktopSignature(targetRoot, architectureState, oracleState.lockSha256);
+  if (stage === 'signature') {
+    return { stage, componentCount: architectureState.components.length };
+  }
+
   const promotionState = await validatePromotion(
     targetRoot,
     projectState.project.projectId,
     oracleState.lockSha256,
+    architectureState,
   );
   if (stage === 'promotion') return { stage, componentCount: promotionState.components.length };
 
@@ -564,10 +1031,10 @@ export async function validateReconstruction(root, stage = 'catalog') {
 }
 
 function parseCli(argv) {
-  if (!argv.length) fail('usage: validate-reconstruction.mjs <target-root> [--stage oracle|promotion|catalog|distribution]');
+  if (!argv.length) fail('usage: validate-reconstruction.mjs <target-root> [--stage oracle|architecture|signature|promotion|catalog|distribution]');
   const [root, flag, stage, ...extra] = argv;
   if (extra.length || (flag && flag !== '--stage') || (flag && !stage)) {
-    fail('usage: validate-reconstruction.mjs <target-root> [--stage oracle|promotion|catalog|distribution]');
+    fail('usage: validate-reconstruction.mjs <target-root> [--stage oracle|architecture|signature|promotion|catalog|distribution]');
   }
   return { root, stage: stage ?? 'catalog' };
 }

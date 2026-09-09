@@ -1,4 +1,4 @@
 interface:
   display_name: "Reconstruct React Reference"
   short_description: "Restore references into reusable React systems"
-  default_prompt: "Use $reconstruct-react-reference to run a scoped audit, close the Oracle, approve a React and TypeScript architecture, and execute an evidence-locked reconstruction with parity and reuse proof."
+  default_prompt: "Use $reconstruct-react-reference to run a scoped audit, close the Oracle, intake any existing reconstruction mismatch or user feedback, approve a React and TypeScript architecture, and execute an evidence-locked correction and reconstruction loop with fresh parity and reuse proof."

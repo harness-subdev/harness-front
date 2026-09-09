@@ -17,6 +17,8 @@ Oracle, clean-room 구현, 패리티 검증, 실제 두 번째 프로젝트 재�
 | `design-system-reference-analyzer` | 승인된 런타임 아카이브와 HTML/CSS/JS 컴포넌트 계약 분석 |
 | `interactive-webgl-analysis-poc` | WebGL, Canvas, shader, scroll/time 인터랙션 분석 및 POC |
 | `react-reference-architecture` | scrubbed 증거를 React/TypeScript 구조 계약으로 변환 |
+| `reference-design-document` | 검증된 구현에서 루트 `DESIGN.md` 생성·검증 |
+| `reference-project-readme` | `DESIGN.md`와 실제 프로젝트를 기준으로 루트 README 작성·검증 |
 
 각 디렉터리에는 해당 스킬의 `SKILL.md`와 기존 `agents/`, `scripts/`,
 `reference(s)/`, `evals/` 리소스가 함께 들어 있습니다.
@@ -56,19 +58,24 @@ reconstruct-react-reference
 │  └─ Oracle lock 및 검증
 │
 ├─ Milestone 2: Clean React/Next.js Reconstruction
-│  ├─ scrubbed component-map
-│  ├─ react-reference-architecture
-│  ├─ 사용자 architecture 승인 및 SHA-256 결합
+│  ├─ 기존 target·사용자 feedback correction intake
+│  ├─ scrubbed schema-v2 component-map
+│  ├─ react-reference-architecture + desktop signature policy
+│  ├─ 사용자 승인, SHA-256 결합, architecture stage
 │  ├─ hash-bound implementation plan
-│  ├─ fresh clean implementer와 TDD vertical slices
-│  ├─ matched-checkpoint research parity
+│  ├─ fresh clean implementer의 desktop signature 우선 구현
+│  ├─ signature stage 통과 후 나머지 TDD vertical slices
+│  ├─ matched-checkpoint parity + feedback correction loop
 │  └─ promotion 및 component catalog
 │
 └─ Milestone 3: Proven Cross-project Design System
    ├─ public package와 executable specimens
    ├─ 실제 두 번째 프로젝트 reuse proof
    ├─ owned/licensed distribution asset profile
-   └─ distribution validation
+   ├─ distribution validation
+   └─ Final project documentation
+      ├─ reference-design-document → DESIGN.md
+      └─ reference-project-readme → README.md
 ```
 
 ## Milestone 1 — Original Runtime Oracle
@@ -151,7 +158,8 @@ Oracle 검증 전에는 metadata-only envelope만 허용됩니다.
 
 ## Milestone 2 — Clean React/Next.js reconstruction
 
-Oracle 통과 후 검증된 증거를 scrubbed `component-map.json`으로 바꾸고
+Oracle 통과 후 검증된 증거와 기존 target의 mismatch·사용자 feedback를
+claim ID와 checkpoint로 정리한 scrubbed schema-v2 `component-map.json`으로 바꾸고
 `react-reference-architecture`를 실행합니다.
 
 ### Architecture contract
@@ -171,6 +179,12 @@ Oracle 통과 후 검증된 증거를 scrubbed `component-map.json`으로 바꾸
 ownership, renderer, dependency budget 또는 parity checkpoint가 실질적으로
 바뀌면 다시 draft와 승인 단계로 돌아갑니다.
 
+schema-v2 `desktopSignature.policy`는 경로, viewport, DPR, input/state,
+readiness, reduced-motion, time/randomness, surface 순서와 root owner,
+비교 방법·tolerance·metric 상한, GPU 계약을 아키텍처 승인과 함께
+hash로 잠깁니다. `--stage architecture` 통과 전에는 계획과 구현을
+시작할 수 없습니다.
+
 ### Clean implementation boundary
 
 분석자가 배포된 구현 코드를 조사했다면 clean implementation은 해당 대화
@@ -189,6 +203,12 @@ scrubbed 계약, 공개 screenshot, observable checkpoint, semantic content,
 `vercel-react-best-practices`, 관찰 가능한 패리티에는 `webapp-testing`을
 사용합니다.
 
+첫 구현은 desktop-primary signature로 제한합니다. 원본이 WebGL,
+WebGL2, WebGPU인 exact-fidelity surface는 같은 renderer class와 증명된
+root owner를 유지해야 하며 DOM, CSS, SVG, Canvas2D fallback은 패리티
+증거를 대체하지 못합니다. matched comparison과 구조화된 GPU status가
+`--stage signature`를 통과해야 더 넓은 slice를 구현할 수 있습니다.
+
 ### Standalone and Immersive Runtime
 
 공개 후보는 Provider, global CSS, source DOM ancestor, Oracle 또는 원본 host
@@ -203,6 +223,11 @@ Oracle과 동일한 route state, viewport, input mode, readiness boundary에서
 컴포넌트별 parity receipt를 작성합니다. 모든 계획된 claim은 `passed`,
 `failed`, `blocked`, `notApplicable` 중 하나로 기록되며, promotion에는 모든
 필수 claim의 통과와 최신 hash binding이 필요합니다.
+
+새 mismatch나 사용자 feedback이 발견되면 안정적인 observable condition을
+`evidenceClaims`에 추가하고 영향받은 promotion을 `stale` 또는
+`unverified`로 돌립니다. 증명된 owner를 수정한 뒤 같은 checkpoint를
+다시 캡처해 claim set의 `unresolved`가 비어야 승격할 수 있습니다.
 
 `reconstructed + parity-verified`인 public candidate만 `component-catalog/`에
 들어갑니다. promotion은 재사용이나 배포 가능성을 자동으로 의미하지
@@ -222,30 +247,47 @@ research-only asset 또는 금지 문자열이 없어야 합니다.
 
 기술적 distribution validation은 법률 검토나 법적 승인과 동일하지 않습니다.
 
+## Final project documentation
+
+모든 요청된 복원 게이트가 검증된 뒤 문서화를 순서대로 실행합니다.
+
+1. `reference-design-document`
+   - 루트 `DESIGN.md`가 없으면 현재 구현과 검증 증거로 생성합니다.
+   - 이미 있으면 현재성과 상대 링크를 검증하고, 근거가 있는 노후 계약만 갱신합니다.
+2. `reference-project-readme`
+   - 검증된 `DESIGN.md`를 링크합니다.
+   - UI preview, runtime, 폴더 구조, 추출 컴포넌트, 재사용 가이드를 README에 정리합니다.
+
+두 문서는 검증 결과의 후속 설명자료이며 parity receipt를 대체하지
+않습니다. 이 단계는 별도 사용자 승인 없이 커밋, 푸시, 배포를 수행하지
+않습니다.
+
 ## Eight workflow gates
 
 | Gate | Required result |
 | --- | --- |
 | 1. Oracle closure | 재생 가능한 Oracle과 유효한 hash lock |
-| 2. Component map and architecture | 승인된 architecture와 정확한 hash binding |
-| 3. Written plan | 동일 architecture hash를 인용한 승인된 vertical-slice 계획 |
-| 4. Clean implementation | Oracle import가 없는 독립 React/Next.js 구현 |
-| 5. Research parity | 최신 binding과 전체 claim을 가진 component receipt |
+| 2. Component map and architecture | 승인된 architecture·desktop signature policy와 정확한 hash binding |
+| 3. Written plan | architecture·signature hash, correction claim, root owner를 인용한 승인 계획 |
+| 4. Clean implementation | Oracle import·보상 overlay가 없고 signature stage를 통과한 독립 구현 |
+| 5. Research parity | 최신 binding과 feedback를 포함한 전체 claim receipt |
 | 6. Promotion and catalog | 검증된 public candidate만 포함한 project catalog |
 | 7. Reuse proof | 실제 두 번째 프로젝트의 동일 구현 소비 receipt |
 | 8. Distribution | 권리·무결성·금지 콘텐츠 검사를 통과한 배포 프로필 |
 
-실행 validator가 제공하는 CLI stage는 네 개입니다.
+실행 validator가 제공하는 CLI stage는 여섯 개입니다.
 
 ```bash
 node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage oracle
+node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage architecture
+node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage signature
 node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage promotion
 node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage catalog
 node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage distribution
 ```
 
-아키텍처 승인, 계획 승인, clean implementation, reuse proof는 독립적인 workflow
-gate이며 관련 hash와 receipt는 다음 validator 단계에서 함께 검사됩니다.
+계획 승인, clean implementation, reuse proof는 독립적인 workflow gate이며
+관련 hash와 receipt는 다음 validator 단계에서 함께 검사됩니다.
 
 ## Artifact layout
 
@@ -277,6 +319,7 @@ Clean target 상태와 receipt:
 ├── promotion.json
 ├── rights-ledger.json
 └── receipts/
+    ├── desktop-signature.json
     ├── parity/<component>.json
     ├── reuse/<component>.json
     └── distribution.json
@@ -295,6 +338,7 @@ receipt와 status는 stale이 되며 다시 검증해야 합니다.
 각 스킬의 독립 테스트는 Node.js 내장 test runner로 실행할 수 있습니다.
 
 ```bash
+node skills/design-system-reference-analyzer/scripts/extract-reference-graph.regression-test.mjs
 node --test skills/design-system-reference-analyzer/scripts/*.test.mjs
 node --test skills/reconstruct-react-reference/scripts/*.test.mjs
 node --test skills/interactive-webgl-analysis-poc/evals/*.test.mjs

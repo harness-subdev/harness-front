@@ -6,11 +6,14 @@
 2. [Project and oracle](#project-and-oracle)
 3. [React architecture](#react-architecture)
 4. [Component map and promotion](#component-map-and-promotion)
-5. [Receipts](#receipts)
-6. [Rights and catalog](#rights-and-catalog)
-7. [Staleness](#staleness)
+5. [Desktop signature receipt](#desktop-signature-receipt)
+6. [Receipts](#receipts)
+7. [Rights and catalog](#rights-and-catalog)
+8. [Staleness](#staleness)
 
-All records use `schemaVersion: 1`. Paths are target-relative unless a field explicitly names the external oracle root. IDs are unique within their file. SHA-256 values are lowercase hexadecimal over exact file bytes.
+Project, Oracle, promotion, parity, reuse, distribution, rights, and catalog records remain `schemaVersion: 1`. The component map, desktop signature receipt, and structured GPU status use `schemaVersion: 2`. Paths are target-relative unless a field explicitly names the external oracle root. IDs are unique within their declared scope. SHA-256 values are lowercase hexadecimal over exact file bytes.
+
+Schema-v1 component maps are legacy read-only inputs. They may continue through `--stage oracle`, which does not read the component map. `--stage architecture` and every later stage stop with an explicit migration error. Migrate deliberately by rebuilding the approved `desktopSignature` policy from current evidence, changing only the component map to schema v2, reapproving its architecture binding, and then producing new schema-v2 signature/GPU receipts. Never infer v2 fields or preserve an old promotion claim silently.
 
 ## Identity rules
 
@@ -82,11 +85,67 @@ architecture to `draft` and invalidates affected downstream approval.
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "architecture": {
     "path": ".reference-reconstruction/react-architecture.md",
     "sha256": "<64 lowercase hex>",
     "status": "approved"
+  },
+  "desktopSignature": {
+    "status": "approved",
+    "sha256": "<canonical-policy-digest>",
+    "policy": {
+      "route": "/",
+      "viewport": { "width": 1280, "height": 720, "dpr": 1 },
+      "exactFidelity": true,
+      "forbiddenCompensation": [
+      "css-overlay",
+      "dom-overlay",
+      "screenshot-overlay",
+      "checkpoint-conditional"
+      ],
+      "checkpoints": [
+      {
+        "id": "desktop-top",
+        "componentId": "ten-years-away/year-narrative",
+        "claimId": "desktop-top",
+        "capture": {
+          "inputMode": "mouse",
+          "state": "top-idle",
+          "readiness": "fonts-assets-and-renderers-ready",
+          "reducedMotion": false,
+          "timeControl": "fixed-or-not-applicable",
+          "randomnessControl": "seeded-or-not-applicable"
+        },
+        "surfaces": [
+          {
+            "id": "hero-fluid",
+            "kind": "webgl2",
+            "rootOwner": "src/effects/hero-fluid/HeroFluidCanvas.tsx",
+            "implementationFiles": [
+              "src/effects/hero-fluid/HeroFluidCanvas.tsx",
+              "src/effects/hero-fluid/hero-fluid-runtime.ts"
+            ],
+            "gpuContract": {
+              "context": { "api": "webgl2", "version": "WebGL 2.0" },
+              "shaderCount": 4,
+              "programCount": 3,
+              "framebufferCount": 2,
+              "passOrder": ["splat", "advection", "mask"],
+              "textureCount": 2
+            }
+          }
+        ],
+        "comparison": {
+          "method": "approved matched-frame method",
+          "tolerance": "approved desktop-top tolerance",
+          "metrics": [
+            { "name": "pixel-difference", "maximum": 0.02, "unit": "ratio" }
+          ]
+        }
+      }
+      ]
+    }
   },
   "components": [
     {
@@ -101,7 +160,13 @@ architecture to `draft` and invalidates affected downstream approval.
 
 The architecture binding is a workflow gate. Its hash is computed over exact
 file bytes, including the final newline. The component map, approved execution
-plan, and clean implementer packet must carry the same value.
+plan, and clean implementer packet must carry the same value. The plan and packet
+also carry the approved `desktopSignature.sha256`; architecture validation checks
+both approval bindings before planning begins.
+
+`desktopSignature.status` is `approved`, and `sha256` is the recursively key-sorted JSON digest of `policy`. The policy is the mandatory first implementation gate and part of the approved architecture boundary. Its route begins with `/`; viewport width and height are positive integers and DPR is positive. Each checkpoint binds a current component claim and all six capture controls. Its ordered `surfaces` preserve identity, multiplicity, kind, root owner, and implementation file closure; the same surface ID cannot change definition across checkpoints. Three Oracle WebGL2 contexts therefore require three named `webgl2` surfaces. Allowed kinds are `dom`, `svg`, `canvas2d`, `webgl`, `webgl2`, and `webgpu`; exact fidelity always sets `exactFidelity: true`.
+
+Comparison policy owns the method, human-readable tolerance, and non-negative metric maxima. A receipt may report only the corresponding observations. GPU contracts lock context API/version, exact resource counts, and exact pass order. WebGL/WebGL2 use `shaderCount`, `programCount`, `framebufferCount`, `textureCount`; WebGPU replaces program/framebuffer counts with `pipelineCount` and `attachmentCount`. Shader and program/pipeline counts are positive; attachment, framebuffer, and texture counts may be zero. `forbiddenCompensation` contains exactly the four values shown.
 
 `.reference-reconstruction/promotion.json` contains every component-map ID exactly once:
 
@@ -137,6 +202,96 @@ Allowed axes:
 
 Promotion means `reconstructed` plus `parity-verified`. It does not imply reuse or distribution validation.
 `claimSetDigest` is SHA-256 over the JSON encoding of the lexically sorted `evidenceClaims` array. Changing the planned claim set invalidates parity.
+
+## Desktop signature receipt
+
+Write `.reference-reconstruction/receipts/desktop-signature.json` before any broader implementation:
+
+```json
+{
+  "schemaVersion": 2,
+  "profile": "desktop-signature",
+  "bindings": {
+    "oracleLockSha256": "<digest>",
+    "architectureSha256": "<digest>",
+    "signaturePolicyDigest": "<digest>"
+  },
+  "route": "/",
+  "viewport": { "width": 1280, "height": 720, "dpr": 1 },
+  "checkpoints": [
+    {
+      "id": "desktop-top",
+      "capture": {
+        "inputMode": "mouse",
+        "state": "top-idle",
+        "readiness": "fonts-assets-and-renderers-ready",
+        "reducedMotion": false,
+        "timeControl": "fixed-or-not-applicable",
+        "randomnessControl": "seeded-or-not-applicable"
+      },
+      "surfaces": [
+        {
+          "id": "hero-fluid",
+          "kind": "webgl2",
+          "rootOwner": "src/effects/hero-fluid/HeroFluidCanvas.tsx",
+          "implementationFiles": [
+            "src/effects/hero-fluid/HeroFluidCanvas.tsx",
+            "src/effects/hero-fluid/hero-fluid-runtime.ts"
+          ],
+          "implementationDigest": "<digest>",
+          "gpuStatus": {
+            "path": "evidence/signature/hero-fluid-gpu-status.json",
+            "sha256": "<digest>"
+          }
+        }
+      ],
+      "comparison": {
+        "method": "approved matched-frame method",
+        "metrics": [{ "name": "pixel-difference", "observed": 0.01, "unit": "ratio" }],
+        "referenceOutputs": [{ "path": "evidence/signature/reference.png", "sha256": "<digest>" }],
+        "targetOutputs": [{ "path": "evidence/signature/target.png", "sha256": "<digest>" }],
+        "evidenceOutputs": [{ "path": "evidence/signature/comparison.json", "sha256": "<digest>" }]
+      },
+      "compensationObserved": []
+    }
+  ]
+}
+```
+
+`signaturePolicyDigest` equals the approved `desktopSignature.sha256`: SHA-256 over recursively key-sorted JSON for the entire validated `desktopSignature.policy` object. It therefore becomes stale if any approved checkpoint capture control, surface identity/count/order/kind/owner/file closure, GPU contract, comparison method/tolerance, or metric maximum changes. The receipt checkpoint IDs and ordered surface IDs must exactly match the policy. It repeats only locked identity fields and adds observations: implementation digest, metric values, output hashes, structured GPU status binding, and `compensationObserved`.
+
+Reference, target, and comparison outputs are target-relative and hash-bound. The validator canonicalizes them with `realpath`, rejects duplicate physical files within a list, and rejects a reference/target pair that resolves to the same physical file or symlink alias. Every receipt metric must match the policy ID/order/unit; its non-negative observed value must not exceed the policy maximum. The receipt cannot add or replace a tolerance.
+
+GPU surfaces require a `gpuStatus` binding; DOM, SVG, and Canvas2D must omit it. A WebGL/WebGL2 status file has this schema:
+
+```json
+{
+  "schemaVersion": 2,
+  "checkpointId": "desktop-top",
+  "surfaceId": "hero-fluid",
+  "context": { "api": "webgl2", "version": "WebGL 2.0" },
+  "shaders": [
+    { "id": "hero-vertex", "compiled": true },
+    { "id": "hero-fragment", "compiled": true }
+  ],
+  "programs": [{ "id": "hero-program", "linked": true }],
+  "framebuffers": [
+    { "id": "fluid-a", "status": "FRAMEBUFFER_COMPLETE" },
+    { "id": "fluid-b", "status": "FRAMEBUFFER_COMPLETE" }
+  ],
+  "passOrder": ["splat", "advection", "mask"],
+  "textures": [
+    { "id": "fluid-a-texture", "ready": true },
+    { "id": "fluid-b-texture", "ready": true }
+  ],
+  "draws": 5802,
+  "errors": []
+}
+```
+
+The validator parses this JSON and matches checkpoint/surface ID, context API/version, exact counts, every compile/link/completeness/readiness result, exact pass order, positive draw count, and zero errors. WebGPU status replaces `programs`/`framebuffers` with `{id, ready}` `pipelines` and `{id, complete}` `attachments`. Evidence-kind strings, screenshots, or a generic “GPU complete” flag are insufficient.
+
+The validator rejects GPU-to-Canvas2D/DOM/SVG substitution, any unresolved item on a signature component, and any non-empty `compensationObserved`. This is a binding and structured-status check, not proof that an undisclosed overlay is absent or that captured metric values are truthful; matched review must inspect the running result and comparison evidence.
 
 ## Receipts
 
@@ -285,7 +440,11 @@ When `reuseStatus` is `reuse-proven`, also include `reuseReceipt` and its exact 
 
 ## Staleness
 
+- Any desktop-signature policy byte change requires a new canonical policy digest, explicit approval, and architecture-stage validation. It invalidates the old signature receipt and every plan or implementer packet bound to the previous `desktopSignature.sha256`.
+- Any signature implementation file, comparison/GPU output, or structured GPU status change invalidates the signature receipt and requires matched recapture before broader work resumes.
 - Oracle lock, interface fingerprint, implementation digest, research asset mapping, planned claims, or parity output change: set `parityStatus` to `stale` and recapture.
+- New user feedback or a validation discrepancy: add or reuse its stable observable condition in `evidenceClaims`, retain incomplete correction work in `unresolved`, and do not create a separate feedback ledger. Set a previously verified affected promotion to `parityStatus: stale`; otherwise keep it `unverified`. Recompute `claimSetDigest`, invalidate the prior receipt hash and authority, then recapture and regenerate the receipt against the current bindings.
+- When feedback materially changes the architecture, return its status to `draft` and invalidate the affected plan approval before implementation resumes.
 - Approved React architecture byte change: return its status to `draft`, replace
   the component-map architecture hash, and reapprove every downstream plan whose
   files, interfaces, state ownership, renderer, dependencies, or checkpoints are
@@ -293,4 +452,5 @@ When `reuseStatus` is `reuse-proven`, also include `reuseReceipt` and its exact 
 - Shared interface, implementation package, consumer package, or either project identity change: set `reuseStatus` to `stale` and re-integrate the consumer.
 - Distribution roots, any scanned file, output package, rights ledger, asset substitution, or forbidden-text policy change: set `distributionStatus` to `stale` and rebuild/re-scan.
 - Do not edit a receipt in place and retain a prior receipt hash. Regenerate the owning catalog or promotion binding.
+- Treat promotion state as mutable and receipts as immutable. Preserve a superseded receipt for audit when appropriate, but remove its authority by changing the promotion status or binding; write the replacement to a new revision or path and bind only its fresh hash in the regenerated catalog.
 - A catalog-only validation cannot endorse `distribution-validated`; run the distribution stage so the status and its ledger/package receipt are checked together.

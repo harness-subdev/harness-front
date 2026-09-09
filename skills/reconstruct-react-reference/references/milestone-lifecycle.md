@@ -6,6 +6,7 @@ Use this reference when the request covers a full site, multiple milestones, ori
 
 - Select Milestone 1 until a replayable Oracle is complete, required runtime and GPU evidence is resolved, and the Oracle lock passes validation.
 - Select Milestone 2 only after the Oracle lock passes and while clean reconstruction, parity receipts, or project-catalog promotion remain incomplete.
+- Remain in or return to Milestone 2 when an existing-target baseline mismatch or accepted user feedback invalidates reconstruction parity. Return to Milestone 1 only when the correction exposes incomplete or incorrect locked Oracle evidence.
 - Select Milestone 3 only after promoted candidates exist and the work has moved to a real second-project consumer or distribution validation.
 - M1 may create a metadata-only validation envelope containing the project marker and Oracle lock because the Oracle-stage validator requires that binding. This envelope is not the clean application target.
 - Clean application files, package metadata, and target dependencies begin only after Oracle validation passes. Keep the immutable Oracle and future clean application in separate sibling projects with separate dependency graphs.
@@ -41,11 +42,12 @@ Every public candidate has two integration profiles:
 
 Default phases:
 
-1. Approved React architecture packet, component design, and clean-room handoff.
-2. Vertical reconstruction slices grouped by shared Page template and behavior risk, not one phase per route.
-3. Standalone validation, parity receipts, promotion records, and project catalog.
+1. Existing-target baseline mismatch intake, approved React architecture packet plus schema-v2 desktop-signature policy, successful architecture-stage validation, component design, and only then planning/clean-room handoff.
+2. Desktop-primary signature implementation and matched proof at the locked route, viewport, DPR, per-checkpoint input/state/readiness/reduced-motion/time/randomness controls, ordered renderer surface identities, comparison criteria, and parsed structured GPU status. Fix failures in the recorded root owner; do not begin broader slices or compensate with CSS/DOM/screenshot overlays.
+3. After the signature gate passes, vertical reconstruction or correction slices grouped by shared Page template, root owner, and behavior risk, not one phase per route.
+4. Matched recapture and correction loops, Standalone validation, fresh parity receipts, promotion records, and project catalog.
 
-Exit only when every promoted candidate is independently authored, parity-verified, Standalone-tested, bound to current interface and implementation digests, and present in the project catalog. Failed, blocked, and unresolved candidates remain outside the catalog.
+Exit only when the desktop signature receipt passes and every promoted candidate is independently authored, parity-verified, Standalone-tested, bound to current interface and implementation digests, and present in the project catalog. The latest accepted user feedback must be represented in the current claim set and by a later matched recapture. No affected promotion may retain `parityStatus: stale` or `unverified`, and no affected component may retain an unresolved correction item. Failed, blocked, and unresolved candidates remain outside the catalog.
 
 ## Milestone 3 - Proven cross-project design system
 
@@ -79,4 +81,4 @@ Do not use `gsd-discuss-phase`, `gsd-plan-phase`, or `gsd-execute-phase` unless 
 
 ## Hard stops
 
-Stop without overwriting the last valid artifact when authority is missing, required source/runtime evidence is absent, the Oracle hash changes, the target points to another Oracle, applicable GPU validation is incomplete, a required claim is unresolved, Standalone fails, receipt bindings are stale, or research-only material reaches a distribution root.
+Stop without overwriting the last valid artifact when authority is missing, required source/runtime evidence is absent, the Oracle hash changes, the target points to another Oracle, a legacy component map has not been explicitly migrated, architecture validation has not passed before planning, applicable structured GPU validation is incomplete, the desktop signature is missing/stale/failed, broader implementation begins before signature proof, a required claim is unresolved, accepted user feedback has not been mapped to an affected component, a correction remains unresolved, an affected promotion retains `parityStatus: stale`, Standalone fails, receipt bindings are stale, or research-only material reaches a distribution root.

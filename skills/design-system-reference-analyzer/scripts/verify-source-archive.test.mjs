@@ -5,8 +5,11 @@ import { createHash } from "node:crypto";
 import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { verifySourceArchive } from "./verify-source-archive.mjs";
+
+const cliScript = fileURLToPath(new URL("./verify-source-archive.mjs", import.meta.url));
 
 function sha256(contents) {
   return createHash("sha256").update(contents).digest("hex");
@@ -1019,7 +1022,7 @@ run("prefixed segmented secret query keys make an archive incomplete", (root, ma
 run("unsafe status outputs preserve the manifest and archived artifacts", (root, manifest) => {
   const manifestPath = writeManifest(root, manifest);
   const manifestBefore = readFileSync(manifestPath);
-  const manifestRun = spawnSync(process.execPath, ["scripts/verify-source-archive.mjs", root, manifestPath, `./${manifestPath.slice(root.length + 1)}`], { encoding: "utf8" });
+  const manifestRun = spawnSync(process.execPath, [cliScript, root, manifestPath, `./${manifestPath.slice(root.length + 1)}`], { encoding: "utf8" });
   assert.notEqual(manifestRun.status, 0);
   assert.match(manifestRun.stderr, /Unsafe status output/);
   assert.deepEqual(readFileSync(manifestPath), manifestBefore);
@@ -1028,7 +1031,7 @@ run("unsafe status outputs preserve the manifest and archived artifacts", (root,
   const artifactBefore = readFileSync(artifactPath);
   const aliasPath = join(root, "status-alias.json");
   symlinkSync(artifactPath, aliasPath);
-  const artifactRun = spawnSync(process.execPath, ["scripts/verify-source-archive.mjs", root, manifestPath, aliasPath], { encoding: "utf8" });
+  const artifactRun = spawnSync(process.execPath, [cliScript, root, manifestPath, aliasPath], { encoding: "utf8" });
   assert.notEqual(artifactRun.status, 0);
   assert.match(artifactRun.stderr, /Unsafe status output/);
   assert.deepEqual(readFileSync(artifactPath), artifactBefore);
@@ -1083,7 +1086,7 @@ run("a malformed manifest never writes through a status symlink", (root, manifes
   const artifactBefore = readFileSync(artifactPath);
   const aliasPath = join(root, "malformed-status.json");
   symlinkSync(artifactPath, aliasPath);
-  const run = spawnSync(process.execPath, ["scripts/verify-source-archive.mjs", root, manifestPath, aliasPath], { encoding: "utf8" });
+  const run = spawnSync(process.execPath, [cliScript, root, manifestPath, aliasPath], { encoding: "utf8" });
   assert.notEqual(run.status, 0);
   assert.deepEqual(readFileSync(artifactPath), artifactBefore);
 });

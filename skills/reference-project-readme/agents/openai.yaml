@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reference Project README"
+  short_description: "Document verified reference reconstructions"
+  default_prompt: "Use $reference-project-readme to create and verify the project README from the validated root DESIGN.md and current reconstruction evidence."

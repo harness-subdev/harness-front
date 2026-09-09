@@ -25,6 +25,9 @@ Start from a scoped evidence packet containing:
   targets affect the architecture;
 - a scrubbed `.reference-reconstruction/component-map.json` when invoked by the
   reconstruction orchestrator;
+- a draft schema-v2 desktop-primary signature policy naming the route, viewport,
+  DPR, per-checkpoint capture controls, ordered observed surfaces and owners,
+  comparison criteria, and GPU contracts to approve with the architecture;
 - the target repository's existing framework and conventions when it exists.
 
 Consume scrubbed contracts and observable facts. Do not copy bundle bodies,
@@ -65,6 +68,11 @@ the approved scope. Do not force Next.js, Vite, CSS Modules, Tailwind, GSAP,
 Framer Motion, React Three Fiber, or any other dependency from visual style alone.
 
 Use `vercel-react-best-practices` for React/Next.js decisions when applicable.
+
+Choose the smallest dependency only after preserving the proven signature owner.
+If runtime evidence assigns an exact checkpoint to WebGL, WebGL2, or WebGPU, a
+Canvas2D, DOM, SVG, or CSS substitute is a fidelity downgrade rather than a
+smaller equivalent implementation.
 
 ### 2. Define deep modules
 
@@ -115,6 +123,10 @@ only CSS shrinking.
 Specify reduced-motion, keyboard, touch, pointer, resize, loading, asset failure,
 and renderer failure behavior for every interactive Section.
 
+Keep fallback surfaces explicit and separate from the parity surface. A static,
+DOM, SVG, Canvas2D, or reduced-motion fallback may be production-safe, but it
+cannot close an exact claim owned by a different renderer.
+
 ### 5. Convert visual evidence into tokens
 
 Define only tokens supported by repeated evidence or needed by multiple modules:
@@ -147,6 +159,11 @@ Every public or Section module must list:
 - fallback and cleanup behavior;
 - unresolved claims that block implementation or parity.
 
+For the desktop signature owner, also list the Oracle surface kind, parity
+surface ID/kind/count/order, root-owner file closure, context/version and exact
+GPU resource/pass expectations, matched capture controls, comparison
+method/tolerance/metric maxima, fallback surface, and forbidden compensation.
+
 Architecture may add accessibility and production safety behavior, but must label
 it as an independently chosen requirement rather than observed reference behavior.
 
@@ -162,9 +179,15 @@ An architecture packet is ready for approval only when:
 - raw research-only material is absent;
 - implementation-blocking uncertainty is listed;
 - the folder tree, module contracts, data models, tokens, and parity checkpoints
-  agree with each other.
+  agree with each other;
+- the first implementation slice is a desktop-primary signature whose policy is
+  represented in `component-map.json.desktopSignature.policy` and explicitly
+  approved by its sibling status and canonical SHA-256;
+- every signature renderer has one root owner, and any WebGL/WebGL2/WebGPU owner
+  retains the same parity surface class;
 
-After approval, the orchestrator must give the exact approved packet to
+After approval, the orchestrator must bind the exact packet and schema-v2 policy,
+run the parent reconstruction validator at `--stage architecture`, and only then give them to
 `writing-plans` and the clean implementer. If the folder structure, public
 interface, state ownership, renderer, or dependency budget changes materially,
 return here, revise the packet, and obtain approval again.

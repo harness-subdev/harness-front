@@ -8,6 +8,12 @@ import test from 'node:test';
 import { validateReconstruction } from './validate-reconstruction.mjs';
 
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+const canonicalize = (value) => Array.isArray(value)
+  ? value.map(canonicalize)
+  : value && typeof value === 'object'
+    ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]))
+    : value;
+const canonicalJson = (value) => JSON.stringify(canonicalize(value));
 
 async function fileSetDigest(root, files) {
   const records = [];
@@ -71,6 +77,8 @@ async function fixture() {
 async function addPromotedComponent(target, overrides = {}) {
   const componentId = 'fixture/year-narrative';
   const evidenceClaims = ['desktop-top', 'mobile-top'];
+  const architecturePath = '.reference-reconstruction/react-architecture.md';
+  const architecture = '# React Architecture\n\nStatus: approved\n';
   const interfaceFiles = ['src/year-narrative.types.ts'];
   const implementationFiles = ['src/year-narrative.ts'];
   const assetMappingFiles = ['.reference-reconstruction/implementation-packet/year-narrative.assets.json'];
@@ -82,7 +90,9 @@ async function addPromotedComponent(target, overrides = {}) {
   const implementationDigest = await fileSetDigest(target, implementationFiles);
   const assetMappingDigest = await fileSetDigest(target, assetMappingFiles);
   await mkdir(path.join(target, 'evidence'), { recursive: true });
+  await writeFile(path.join(target, 'evidence/year-narrative-reference.png'), 'reference render');
   await writeFile(path.join(target, 'evidence/year-narrative.png'), 'render');
+  await writeFile(path.join(target, 'evidence/year-narrative-comparison.json'), 'comparison evidence');
   const receipt = {
     schemaVersion: 1,
     componentId,
@@ -109,10 +119,91 @@ async function addPromotedComponent(target, overrides = {}) {
   const receiptPath = `.reference-reconstruction/receipts/parity/${componentId.replace('/', '--')}.json`;
   const absoluteReceipt = await writeJson(target, receiptPath, receipt);
   const receiptBytes = await readFile(absoluteReceipt);
+  await writeFile(path.join(target, architecturePath), architecture);
 
+  const desktopSignaturePolicy = {
+    route: '/',
+    viewport: { width: 1280, height: 720, dpr: 1 },
+    exactFidelity: true,
+    forbiddenCompensation: ['css-overlay', 'dom-overlay', 'screenshot-overlay', 'checkpoint-conditional'],
+    checkpoints: [{
+      id: 'desktop-top',
+      componentId,
+      claimId: 'desktop-top',
+      capture: {
+        inputMode: 'mouse',
+        state: 'top-idle',
+        readiness: 'fonts-assets-and-renderers-ready',
+        reducedMotion: false,
+        timeControl: 'not-applicable',
+        randomnessControl: 'not-applicable',
+      },
+      surfaces: [{
+        id: 'year-narrative-dom',
+        kind: 'dom',
+        rootOwner: implementationFiles[0],
+        implementationFiles,
+      }],
+      comparison: {
+        method: 'matched screenshot comparison',
+        tolerance: 'approved desktop-top tolerance',
+        metrics: [{ name: 'pixel-difference', maximum: 0.02, unit: 'ratio' }],
+      },
+    }],
+  };
+  const desktopSignature = {
+    status: 'approved',
+    sha256: sha256(canonicalJson(desktopSignaturePolicy)),
+    policy: desktopSignaturePolicy,
+  };
   await writeJson(target, '.reference-reconstruction/component-map.json', {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    architecture: {
+      path: architecturePath,
+      sha256: sha256(architecture),
+      status: 'approved',
+    },
+    desktopSignature,
     components: [{ id: componentId, publicCandidate: true, evidenceClaims, unresolved: [] }],
+  });
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', {
+    schemaVersion: 2,
+    profile: 'desktop-signature',
+    bindings: {
+      oracleLockSha256: receipt.bindings.oracleLockSha256,
+      architectureSha256: sha256(architecture),
+      signaturePolicyDigest: desktopSignature.sha256,
+    },
+    route: '/',
+    viewport: { width: 1280, height: 720, dpr: 1 },
+    checkpoints: [{
+      id: 'desktop-top',
+      capture: { ...desktopSignaturePolicy.checkpoints[0].capture },
+      surfaces: [{
+        id: 'year-narrative-dom',
+        kind: 'dom',
+        rootOwner: implementationFiles[0],
+        implementationFiles,
+        implementationDigest,
+      }],
+      comparison: {
+        method: 'matched screenshot comparison',
+        metrics: [{ name: 'pixel-difference', observed: 0.01, unit: 'ratio' }],
+        referenceOutputs: [{
+          path: 'evidence/year-narrative-reference.png',
+          sha256: sha256('reference render'),
+        }],
+        targetOutputs: [{
+          path: 'evidence/year-narrative.png',
+          sha256: sha256('render'),
+        }],
+        evidenceOutputs: [{
+          path: 'evidence/year-narrative-comparison.json',
+          sha256: sha256('comparison evidence'),
+        }],
+      },
+      compensationObserved: [],
+    }],
   });
   await writeJson(target, '.reference-reconstruction/promotion.json', {
     schemaVersion: 1,
@@ -177,6 +268,70 @@ async function addPromotedComponent(target, overrides = {}) {
   });
 
   return { componentId, receiptPath, interfaceFingerprint, implementationDigest, assetMappingDigest };
+}
+
+async function configureWebglSignature(target, surfaceCount = 1) {
+  const componentMap = await readJson(target, '.reference-reconstruction/component-map.json');
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  const baseIds = ['hero-fluid', 'theme-liquid', 'featured-globe'];
+  const policySurfaces = [];
+  const receiptSurfaces = [];
+  const statuses = [];
+
+  for (let index = 0; index < surfaceCount; index += 1) {
+    const id = baseIds[index] ?? `surface-${index + 1}`;
+    const rootOwner = index === 0 ? 'src/year-narrative.ts' : `src/${id}.ts`;
+    if (index > 0) await writeFile(path.join(target, rootOwner), `export const surface${index} = true;\n`);
+    const implementationFiles = [rootOwner];
+    const gpuContract = {
+      context: { api: 'webgl2', version: 'WebGL 2.0 fixture' },
+      shaderCount: 2,
+      programCount: 1,
+      framebufferCount: 1,
+      passOrder: [`${id}:draw`],
+      textureCount: 2,
+    };
+    policySurfaces.push({ id, kind: 'webgl2', rootOwner, implementationFiles, gpuContract });
+
+    const status = {
+      schemaVersion: 2,
+      checkpointId: 'desktop-top',
+      surfaceId: id,
+      context: { api: 'webgl2', version: 'WebGL 2.0 fixture' },
+      shaders: [
+        { id: `${id}:vertex`, compiled: true },
+        { id: `${id}:fragment`, compiled: true },
+      ],
+      programs: [{ id: `${id}:program`, linked: true }],
+      framebuffers: [{ id: `${id}:fbo`, status: 'FRAMEBUFFER_COMPLETE' }],
+      passOrder: [`${id}:draw`],
+      textures: [
+        { id: `${id}:texture-1`, ready: true },
+        { id: `${id}:texture-2`, ready: true },
+      ],
+      draws: 1,
+      errors: [],
+    };
+    const gpuStatusPath = `evidence/${id}-gpu-status.json`;
+    const absoluteStatus = await writeJson(target, gpuStatusPath, status);
+    statuses.push({ path: gpuStatusPath, status });
+    receiptSurfaces.push({
+      id,
+      kind: 'webgl2',
+      rootOwner,
+      implementationFiles,
+      implementationDigest: await fileSetDigest(target, implementationFiles),
+      gpuStatus: { path: gpuStatusPath, sha256: sha256(await readFile(absoluteStatus)) },
+    });
+  }
+
+  componentMap.desktopSignature.policy.checkpoints[0].surfaces = policySurfaces;
+  componentMap.desktopSignature.sha256 = sha256(canonicalJson(componentMap.desktopSignature.policy));
+  signature.bindings.signaturePolicyDigest = componentMap.desktopSignature.sha256;
+  signature.checkpoints[0].surfaces = receiptSurfaces;
+  await writeJson(target, '.reference-reconstruction/component-map.json', componentMap);
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+  return { componentMap, signature, statuses };
 }
 
 async function addReuseProof(root, target, overrides = {}) {
@@ -334,6 +489,268 @@ test('rejects a non-promoted component from the public catalog', async () => {
   await assert.rejects(validateReconstruction(target, 'catalog'), /not promoted/);
 });
 
+test('rejects promotion without an approved architecture binding', async (t) => {
+  for (const mode of ['missing', 'draft']) {
+    await t.test(mode, async () => {
+      const { target } = await fixture();
+      await addPromotedComponent(target);
+      const componentMap = await readJson(target, '.reference-reconstruction/component-map.json');
+      if (mode === 'missing') delete componentMap.architecture;
+      else componentMap.architecture.status = 'draft';
+      await writeJson(target, '.reference-reconstruction/component-map.json', componentMap);
+
+      await assert.rejects(validateReconstruction(target, 'promotion'), /architecture/);
+    });
+  }
+});
+
+test('rejects a changed approved architecture as stale', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  await writeFile(
+    path.join(target, '.reference-reconstruction/react-architecture.md'),
+    '# React Architecture\n\nStatus: changed after approval\n',
+  );
+
+  await assert.rejects(validateReconstruction(target, 'promotion'), /architecture.*hash mismatch/);
+});
+
+test('validates approved architecture and the desktop signature before promotion', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+
+  assert.deepEqual(await validateReconstruction(target, 'architecture'), {
+    stage: 'architecture',
+    componentCount: 1,
+  });
+  assert.deepEqual(await validateReconstruction(target, 'signature'), {
+    stage: 'signature',
+    componentCount: 1,
+  });
+});
+
+test('reports an explicit migration boundary for legacy component-map schemaVersion 1', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const componentMap = await readJson(target, '.reference-reconstruction/component-map.json');
+  componentMap.schemaVersion = 1;
+  await writeJson(target, '.reference-reconstruction/component-map.json', componentMap);
+
+  assert.equal((await validateReconstruction(target, 'oracle')).stage, 'oracle');
+  await assert.rejects(
+    validateReconstruction(target, 'architecture'),
+    /schemaVersion 1 is legacy.*migrate.*schemaVersion 2/i,
+  );
+});
+
+test('rejects a legacy schemaVersion 1 desktop signature receipt under a v2 component map', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  signature.schemaVersion = 1;
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+
+  await assert.rejects(validateReconstruction(target, 'signature'), /desktop signature receipt\.schemaVersion must be 2/);
+});
+
+test('rejects architecture without a desktop signature policy', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const componentMap = await readJson(target, '.reference-reconstruction/component-map.json');
+  delete componentMap.desktopSignature;
+  await writeJson(target, '.reference-reconstruction/component-map.json', componentMap);
+
+  await assert.rejects(validateReconstruction(target, 'architecture'), /desktopSignature/);
+});
+
+test('rejects an unapproved desktop signature policy byte change at architecture stage', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const componentMap = await readJson(target, '.reference-reconstruction/component-map.json');
+  componentMap.desktopSignature.policy.checkpoints[0].capture.state = 'changed-without-approval';
+  await writeJson(target, '.reference-reconstruction/component-map.json', componentMap);
+
+  await assert.rejects(
+    validateReconstruction(target, 'architecture'),
+    /approved desktop signature policy hash mismatch/,
+  );
+});
+
+test('promotion cannot bypass a missing desktop signature receipt', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  await unlink(path.join(target, '.reference-reconstruction/receipts/desktop-signature.json'));
+
+  await assert.rejects(validateReconstruction(target, 'promotion'), /desktop signature receipt is unreadable/);
+});
+
+test('preserves the identity and multiplicity of three exact WebGL2 signature surfaces', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  await configureWebglSignature(target, 3);
+
+  assert.equal((await validateReconstruction(target, 'signature')).componentCount, 1);
+
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  signature.checkpoints[0].surfaces = signature.checkpoints[0].surfaces.slice(0, 1);
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+  await assert.rejects(
+    validateReconstruction(target, 'signature'),
+    /surface IDs and order must exactly match.*hero-fluid.*theme-liquid.*featured-globe/i,
+  );
+});
+
+test('rejects Canvas2D substitution for an exact WebGL2 signature surface', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  await configureWebglSignature(target);
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  signature.checkpoints[0].surfaces[0].kind = 'canvas2d';
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+
+  await assert.rejects(validateReconstruction(target, 'signature'), /surface hero-fluid kind must remain webgl2/i);
+});
+
+test('treats any changed approved capture, tolerance, or owner policy as stale', async (context) => {
+  const cases = [
+    ['state', async (target, policy) => { policy.checkpoints[0].capture.state = 'pointer-active'; }],
+    ['tolerance', async (target, policy) => { policy.checkpoints[0].comparison.tolerance = 'changed tolerance'; }],
+    ['owner', async (target, policy) => {
+      await writeFile(path.join(target, 'src/new-owner.ts'), 'export const owner = true;\n');
+      policy.checkpoints[0].surfaces[0].rootOwner = 'src/new-owner.ts';
+      policy.checkpoints[0].surfaces[0].implementationFiles = ['src/new-owner.ts'];
+    }],
+  ];
+  for (const [name, mutate] of cases) {
+    await context.test(name, async () => {
+      const { target } = await fixture();
+      await addPromotedComponent(target);
+      const componentMap = await readJson(target, '.reference-reconstruction/component-map.json');
+      await mutate(target, componentMap.desktopSignature.policy);
+      componentMap.desktopSignature.sha256 = sha256(canonicalJson(componentMap.desktopSignature.policy));
+      await writeJson(target, '.reference-reconstruction/component-map.json', componentMap);
+      await assert.rejects(validateReconstruction(target, 'signature'), /signaturePolicyDigest mismatch/);
+    });
+  }
+});
+
+test('receipt observations cannot replace locked capture or tolerance fields', async (context) => {
+  await context.test('capture state', async () => {
+    const { target } = await fixture();
+    await addPromotedComponent(target);
+    const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+    signature.checkpoints[0].capture.state = 'different-state';
+    await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+    await assert.rejects(validateReconstruction(target, 'signature'), /capture does not match the approved policy/);
+  });
+
+  await context.test('metric maximum', async () => {
+    const { target } = await fixture();
+    await addPromotedComponent(target);
+    const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+    signature.checkpoints[0].comparison.metrics[0].maximum = 1;
+    await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+    await assert.rejects(validateReconstruction(target, 'signature'), /metrics\[0\] fields must be exactly/);
+  });
+});
+
+test('Canvas2D signature surfaces pass without GPU status evidence', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const componentMap = await readJson(target, '.reference-reconstruction/component-map.json');
+  componentMap.desktopSignature.policy.checkpoints[0].surfaces[0].kind = 'canvas2d';
+  componentMap.desktopSignature.sha256 = sha256(canonicalJson(componentMap.desktopSignature.policy));
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  signature.bindings.signaturePolicyDigest = componentMap.desktopSignature.sha256;
+  signature.checkpoints[0].surfaces[0].kind = 'canvas2d';
+  await writeJson(target, '.reference-reconstruction/component-map.json', componentMap);
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+
+  assert.equal((await validateReconstruction(target, 'signature')).componentCount, 1);
+});
+
+test('rejects architecture and signature while an owning component has any unresolved item', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const componentMap = await readJson(target, '.reference-reconstruction/component-map.json');
+  componentMap.components[0].unresolved = ['renderer-owner-not-proven'];
+  await writeJson(target, '.reference-reconstruction/component-map.json', componentMap);
+
+  await assert.rejects(validateReconstruction(target, 'architecture'), /signature component.*has unresolved items/i);
+  await assert.rejects(validateReconstruction(target, 'signature'), /signature component.*has unresolved items/i);
+});
+
+test('rejects observed compensation in a desktop signature receipt', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  signature.checkpoints[0].compensationObserved = ['css-overlay'];
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+
+  await assert.rejects(validateReconstruction(target, 'signature'), /observed forbidden compensation css-overlay/);
+});
+
+test('rejects a desktop signature metric outside its approved tolerance', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  signature.checkpoints[0].comparison.metrics[0].observed = 0.03;
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+
+  await assert.rejects(validateReconstruction(target, 'signature'), /metric pixel-difference exceeds its approved maximum/);
+});
+
+test('rejects a symlink alias that makes reference and target outputs the same physical file', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const referenceOutput = path.join(target, 'evidence/year-narrative-reference.png');
+  await unlink(referenceOutput);
+  await symlink('year-narrative.png', referenceOutput);
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  signature.checkpoints[0].comparison.referenceOutputs[0].sha256 = sha256('render');
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+
+  await assert.rejects(validateReconstruction(target, 'signature'), /reference and target outputs must be distinct physical files/);
+});
+
+test('rejects malformed structured GPU status JSON', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const { signature, statuses } = await configureWebglSignature(target);
+  await writeFile(path.join(target, statuses[0].path), '{');
+  signature.checkpoints[0].surfaces[0].gpuStatus.sha256 = sha256('{');
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+
+  await assert.rejects(validateReconstruction(target, 'signature'), /GPU status.*not valid JSON/i);
+});
+
+test('rejects every failing structured WebGL GPU status field', async (context) => {
+  const cases = [
+    ['surface identity', (status) => { status.surfaceId = 'hidden-replacement'; }, /surfaceId must be hero-fluid/],
+    ['context version', (status) => { status.context.version = 'WebGL 1.0'; }, /context version mismatch/],
+    ['shader compile', (status) => { status.shaders[0].compiled = false; }, /shader .* did not compile/],
+    ['program link', (status) => { status.programs[0].linked = false; }, /program .* did not link/],
+    ['framebuffer completeness', (status) => { status.framebuffers[0].status = 'FRAMEBUFFER_INCOMPLETE_ATTACHMENT'; }, /framebuffer .* is not complete/],
+    ['pass order', (status) => { status.passOrder = ['different-pass']; }, /passOrder mismatch/],
+    ['texture readiness', (status) => { status.textures[0].ready = false; }, /texture .* is not ready/],
+    ['texture count', (status) => { status.textures.pop(); }, /textures count mismatch/],
+    ['draw count', (status) => { status.draws = 0; }, /draws must be greater than zero/],
+    ['GL errors', (status) => { status.errors = ['INVALID_OPERATION']; }, /errors must be empty/],
+  ];
+  for (const [name, mutate, expected] of cases) {
+    await context.test(name, async () => {
+      const { target } = await fixture();
+      await addPromotedComponent(target);
+      const { signature, statuses } = await configureWebglSignature(target);
+      mutate(statuses[0].status);
+      const statusFile = await writeJson(target, statuses[0].path, statuses[0].status);
+      signature.checkpoints[0].surfaces[0].gpuStatus.sha256 = sha256(await readFile(statusFile));
+      await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
+      await assert.rejects(validateReconstruction(target, 'signature'), expected);
+    });
+  }
+});
+
 test('rejects a parity receipt whose bindings are stale', async () => {
   const { target } = await fixture();
   await addPromotedComponent(target, {
@@ -436,6 +853,26 @@ test('rejects a component-map claim removed after promotion and receipt binding'
   await assert.rejects(validateReconstruction(target, 'promotion'), /claimSetDigest hash mismatch/);
 });
 
+test('treats a newly added user-feedback claim as stale against the previous parity receipt', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const map = await readJson(target, '.reference-reconstruction/component-map.json');
+  map.components[0].evidenceClaims.push('feedback-work-globe-uses-reference-textures');
+  await writeJson(target, '.reference-reconstruction/component-map.json', map);
+
+  await assert.rejects(validateReconstruction(target, 'promotion'), /claimSetDigest hash mismatch/);
+});
+
+test('rejects parity verification while a user-feedback correction remains unresolved', async () => {
+  const { target } = await fixture();
+  await addPromotedComponent(target);
+  const map = await readJson(target, '.reference-reconstruction/component-map.json');
+  map.components[0].unresolved = ['feedback-work-globe-renderer-mismatch'];
+  await writeJson(target, '.reference-reconstruction/component-map.json', map);
+
+  await assert.rejects(validateReconstruction(target, 'promotion'), /cannot close unresolved component claims/);
+});
+
 test('uses an unambiguous deterministic encoding for the exact planned claim set', async () => {
   const { target } = await fixture();
   await addPromotedComponent(target);
@@ -443,7 +880,14 @@ test('uses an unambiguous deterministic encoding for the exact planned claim set
   const collidingClaims = ['a', 'b\nc'];
   const map = await readJson(target, '.reference-reconstruction/component-map.json');
   map.components[0].evidenceClaims = claims;
+  map.desktopSignature.policy.checkpoints[0].id = 'a\nb';
+  map.desktopSignature.policy.checkpoints[0].claimId = 'a\nb';
+  map.desktopSignature.sha256 = sha256(canonicalJson(map.desktopSignature.policy));
   await writeJson(target, '.reference-reconstruction/component-map.json', map);
+  const signature = await readJson(target, '.reference-reconstruction/receipts/desktop-signature.json');
+  signature.bindings.signaturePolicyDigest = map.desktopSignature.sha256;
+  signature.checkpoints[0].id = 'a\nb';
+  await writeJson(target, '.reference-reconstruction/receipts/desktop-signature.json', signature);
   const promotionDocument = await readJson(target, '.reference-reconstruction/promotion.json');
   const promotion = promotionDocument.components[0];
   promotion.claimSetDigest = sha256([...collidingClaims].sort().join('\n'));
