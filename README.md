@@ -362,3 +362,11 @@ node skills/interactive-webgl-analysis-poc/scripts/test-tools.mjs
 
 [MIT](LICENSE) © 2026 herness-subdev contributors. 외부 프로젝트와 자산에는 각자의
 라이선스가 적용됩니다.
+
+## Build and releases
+
+배포 버전은 루트 `VERSION`에서 관리합니다. PR과 main 변경 시 전체 테스트와
+소스 패키징이 실행되며, `v버전` 태그 push가 검증된 GitHub Release를 게시합니다.
+빌드 산출물에는 커밋·실행 정보를 담은 `build-info.json`과 SHA-256 체크섬이
+제공됩니다. 버전 PR 준비, 다운로드 설치, 실패 복구는
+[빌드·릴리스 운영 안내](docs/RELEASING.md)를 참고하세요.

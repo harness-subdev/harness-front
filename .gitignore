@@ -5,3 +5,6 @@ node_modules/
 source/
 .reference-reconstruction/
 component-catalog/
+
+# Local build output
+dist/
