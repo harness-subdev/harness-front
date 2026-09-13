@@ -5,8 +5,8 @@ version=$(cat VERSION)
 [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo 'VERSION must be stable MAJOR.MINOR.PATCH' >&2; exit 1; }
 sha=$(git rev-parse HEAD)
 if [[ "${GITHUB_REF_TYPE:-}" == tag ]]; then
-  [[ "$GITHUB_REF_NAME" == "v$version" ]]
-  [[ "$(git rev-parse "refs/tags/$GITHUB_REF_NAME^{commit}")" == "$sha" ]]
+  [[ "$GITHUB_REF_NAME" == "v$version" ]] || { echo "Tag/version mismatch" >&2; exit 1; }
+  [[ "$(git rev-parse "refs/tags/$GITHUB_REF_NAME^{commit}")" == "$sha" ]] || { echo "Tag/commit mismatch" >&2; exit 1; }
 fi
 # ponytail: release versions are edited in a reviewed PR; no custom bump engine.
 [[ -z "$(git status --porcelain --untracked-files=no)" ]] || { echo 'Commit tracked changes before packaging' >&2; exit 1; }
@@ -15,7 +15,7 @@ mkdir -p dist
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
 git archive HEAD | tar -xf - -C "$stage"
-node --test "$stage"/skills/design-system-reference-analyzer/scripts/*.test.mjs "$stage"/skills/reconstruct-react-reference/scripts/*.test.mjs "$stage"/skills/interactive-webgl-analysis-poc/evals/*.test.mjs
+node --test "$stage"/scripts/*.test.mjs "$stage"/skills/design-system-reference-analyzer/scripts/*.test.mjs "$stage"/skills/reconstruct-react-reference/scripts/*.test.mjs "$stage"/skills/interactive-webgl-analysis-poc/evals/*.test.mjs
 node "$stage/skills/design-system-reference-analyzer/scripts/extract-reference-graph.regression-test.mjs"
 node "$stage/skills/interactive-webgl-analysis-poc/scripts/test-tools.mjs"
 BUILD_VERSION="$version" BUILD_SHA="$sha" BUILD_STAGE="$stage" node --input-type=module <<'JS'
