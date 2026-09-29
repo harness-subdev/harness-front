@@ -10,7 +10,7 @@ if [[ "${GITHUB_REF_TYPE:-}" == tag ]]; then
 fi
 # ponytail: release versions are edited in a reviewed PR; no custom bump engine.
 [[ -z "$(git status --porcelain --untracked-files=no)" ]] || { echo 'Commit tracked changes before packaging' >&2; exit 1; }
-name="herness-front-$version-${sha:0:12}"
+name="harness-front-$version-${sha:0:12}"
 mkdir -p dist
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT

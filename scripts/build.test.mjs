@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 test('build rejects malformed versions and mismatched tags before packaging', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'herness-build-check-'));
+  const dir = mkdtempSync(join(tmpdir(), 'harness-build-check-'));
   const run = (cmd, args, env = {}) => spawnSync(cmd, args, { cwd: dir, encoding: 'utf8', env: { ...process.env, ...env } });
   try {
     copyFileSync(new URL('./build.sh', import.meta.url), join(dir, 'build.sh'));

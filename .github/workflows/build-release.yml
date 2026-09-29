@@ -61,4 +61,4 @@ jobs:
           sha256sum -c *.sha256
           printf 'Codex 스킬 7개와 검증 도구를 포함한 배포본입니다.\n\nVersion: %s\nCommit: %s\nBuild: %s\n\n설치 및 검증 방법은 압축 파일의 docs/RELEASING.md를 참고하세요.\n' "$VERSION" "$BUILD_SHA" "$RUN_URL" > notes.md
           # Existing drafts/releases fail closed; never replace published assets.
-          gh release create "$TAG" ./*.tar.gz ./*.sha256 --verify-tag --title "herness-front $TAG" --notes-file notes.md --generate-notes
+          gh release create "$TAG" ./*.tar.gz ./*.sha256 --verify-tag --title "harness-front $TAG" --notes-file notes.md --generate-notes

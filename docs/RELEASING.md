@@ -45,11 +45,11 @@ git push origin "v$version"
 GitHub Releases에서 같은 버전의 `.tar.gz`와 `.sha256` 파일을 내려받습니다.
 
 ```bash
-shasum -a 256 -c herness-front-*.sha256
-mkdir herness-front-release
-tar -xzf herness-front-*.tar.gz -C herness-front-release
+shasum -a 256 -c harness-front-*.sha256
+mkdir harness-front-release
+tar -xzf harness-front-*.tar.gz -C harness-front-release
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
-cp -R herness-front-release/skills/* "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R harness-front-release/skills/* "${CODEX_HOME:-$HOME/.codex}/skills/"
 ```
 
 동일 이름의 설치 스킬은 갱신됩니다. 사용자 수정본이 있으면 먼저 백업하세요.

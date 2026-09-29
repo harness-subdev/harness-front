@@ -1,4 +1,4 @@
-# herness-front
+# harness-front
 
 프론트엔드 레퍼런스를 증거 기반으로 분석하고, 독립적인 React/Next.js
 구현과 재사용 가능한 디자인 시스템으로 발전시키기 위한 Codex 스킬
@@ -29,8 +29,8 @@ Oracle, clean-room 구현, 패리티 검증, 실제 두 번째 프로젝트 재�
 연결합니다.
 
 ```bash
-git clone https://github.com/herness-subdev/herness-front.git
-cd herness-front
+git clone https://github.com/harness-subdev/harness-front.git
+cd harness-front
 cp -R skills/* "${CODEX_HOME:-$HOME/.codex}/skills/"
 ```
 
@@ -360,7 +360,7 @@ node skills/interactive-webgl-analysis-poc/scripts/test-tools.mjs
 
 ## License
 
-[MIT](LICENSE) © 2026 herness-subdev contributors. 외부 프로젝트와 자산에는 각자의
+[MIT](LICENSE) © 2026 harness-subdev contributors. 외부 프로젝트와 자산에는 각자의
 라이선스가 적용됩니다.
 
 ## Build and releases
