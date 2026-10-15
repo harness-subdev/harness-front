@@ -75,7 +75,7 @@ GSD is the management rail only: project onboarding, milestone lifecycle, phase 
 
 The implementation rail is:
 
-`brainstorming -> writing-plans -> test-driven-development when code changes -> implement or subagent-driven-development -> requesting-code-review -> verification-before-completion`
+`brainstorming -> writing-plans -> test-driven-development when code changes -> implement or subagent-driven-development -> code-review -> verification-before-completion`
 
 Do not use `gsd-discuss-phase`, `gsd-plan-phase`, or `gsd-execute-phase` unless the user explicitly requests GSD-native phase execution.
 

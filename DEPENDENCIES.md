@@ -30,7 +30,8 @@ here:
 - `implement` or `subagent-driven-development` — approved plan execution
 - `vercel-react-best-practices` — React and Next.js decisions
 - `webapp-testing` — observable browser parity
-- `requesting-code-review` — implementation review
+- `code-review` — implementation review from
+  [harness-global](https://github.com/harness-subdev/harness-global)
 
 ## Conditional capabilities
 
@@ -42,6 +43,8 @@ here:
   not a vendored library.
 - GSD may manage projects, milestones, phases, progress, audits, summaries, and
   completion. GSD-native implementation workflows are not required by default.
+- GitHub publication uses `github-workflow` and `github-remote-push` from
+  [harness-github](https://github.com/harness-subdev/harness-github).
 
 ## Referenced web libraries
 
