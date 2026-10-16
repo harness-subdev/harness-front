@@ -46,6 +46,17 @@ here:
 - GitHub publication uses `github-workflow` and `github-remote-push` from
   [harness-github](https://github.com/harness-subdev/harness-github).
 
+## Motion capture requirements
+
+- `web-component-motion-capture` reuses the separately installed
+  `web-video-optimize` skill for video conversion and verification. Install it
+  alongside this skill in the user skill catalog. It is not bundled here.
+- Video processing requires ffmpeg/ffprobe. The optional macOS window recorder
+  requires Swift and a macOS SDK providing ScreenCaptureKit `SCRecordingOutput`,
+  plus the actual execution app’s Screen Recording permission.
+- Browser input uses connected Chrome. Sandbox execution approval is separate
+  from OS permission; the skill documents how to distinguish them.
+
 ## Referenced web libraries
 
 The skills can detect or reason about libraries used by a target website, such

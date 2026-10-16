@@ -1,0 +1,3 @@
+interface:
+  display_name: "Web Component Motion Capture"
+  short_description: "Capture real web UI motion for component previews"

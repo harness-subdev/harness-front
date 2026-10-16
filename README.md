@@ -19,6 +19,7 @@ Oracle, clean-room 구현, 패리티 검증, 실제 두 번째 프로젝트 재�
 | `react-reference-architecture` | scrubbed 증거를 React/TypeScript 구조 계약으로 변환 |
 | `reference-design-document` | 검증된 구현에서 루트 `DESIGN.md` 생성·검증 |
 | `reference-project-readme` | `DESIGN.md`와 실제 프로젝트를 기준으로 루트 README 작성·검증 |
+| `web-component-motion-capture` | 실제 웹 UI 동작 촬영, 영상/poster 생성과 항목별 검증 |
 
 각 디렉터리에는 해당 스킬의 `SKILL.md`와 기존 `agents/`, `scripts/`,
 `reference(s)/`, `evals/` 리소스가 함께 들어 있습니다.
