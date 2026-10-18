@@ -64,6 +64,18 @@ folder structure, Page/Section/proven-UI modules, TypeScript content interfaces,
 design tokens, responsive substitutions, state ownership, motion/renderer seams,
 dependency budget, implementation slices, and parity checkpoints.
 
+Before approval, apply [web-reference-react-structure](../../web-reference-react-structure/SKILL.md), its [architecture contract](../../web-reference-react-structure/references/architecture.md), the canonical [portable structure](../../react-reference-architecture/references/portable-structure.md) and [UI naming vocabulary](../../react-reference-architecture/references/ui-naming-vocabulary.md) as structural constraints on this packet:
+
+- Require profile `role-first-portable-library`, version 2. Record host application, library and source roots, vocabulary version and applicable project policy. An existing layout is migration input, not another target profile.
+- The library source uses five implementation roles `pages`, `sections`, `components`, `elements`, `interactions`, plus an `exports/` interface directory. Only `pages` and `sections` group by actual page key or optional `common/`; `components`, `elements`, and `interactions` contain named modules directly without page/common subdivisions. Keep semantic page → section → private child ownership; do not nest role directories inside Pages or create root `features`/`shared`/`common` implementations.
+- Public entries are `src/exports/<page-key>.ts` and `src/exports/common.ts`, with named re-exports only and actual type definitions colocated with their implementation. Use actual page implementations rather than duplicating an index per data route. Internal implementations import files directly, never their own `exports/` entries; hosts and examples import the page/common public entry through a local path/alias or an actual package export. Do not add a catch-all or per-module public index.
+- Framework route composition and adapters stay in the host outside the library source root. Logical host/library separation does not require a separate npm package or `packages/` directory. Keep assets and global CSS outside the library source root; reuse existing host CSS for Tailwind inputs, tokens, fonts, base rules and necessary keyframes. Add a separate `styles/` directory only for a concrete package/style-delivery requirement; keep owner-local implementation support beside its owner. Reusable code receives content/host inputs and has no page-internal/default-content/framework dependency. Record Site assembly exceptions as individually named composition files and imports, never a folder-wide waiver.
+- Apply vocabulary-based component names, matching PascalCase files/exports/props and Page/Section suffixes. Keep semantic kind, owner and shared status independent of physical placement; state responsibilities remain state. Record stable IDs/aliases, role/source/public-import/use/example/transfer facts in the packet's discovery inventory using supported catalog fields only. Same-role names do not prove identical implementation or reuse.
+- DOM-local Tailwind utilities express layout, breakpoints, state and complex motion; continuous inputs retain CSS variables and proven imperative ownership. Preserve exact values, transform order, SSR semantics and the existing reset during an approved refactor.
+- A later `examples/component-reuse/` fixture uses independent content and assets and documents its source-scanning/theme requirements. Do not implement the fixture before signature proof.
+
+Use domain names for each reference's actual pages and the vocabulary's preferred responsibility names for its UI. Create only meaningful modules and public entries. Pass the exact profile/version, roots, vocabulary, named indices and catalog handoff through architecture, plan and implementation without substituting the previous layout. The tree does not change renderer choice, fidelity criteria, source boundaries or any approved gate. Bind the resulting exact tree and interfaces in the same architecture packet before planning.
+
 Use `brainstorming`. Approve the exact architecture revision, deep public
 interfaces, internal ownership, renderer choice, two asset profiles, responsive
 states, accessibility additions, and the first vertical slice. Record the
@@ -81,7 +93,7 @@ Run `--stage architecture` after the exact architecture revision and schema-v2 s
 
 ## Gate 3: Written implementation plan
 
-Use `writing-plans`. Cite the approved architecture path and SHA-256 plus the approved `desktopSignature.sha256`, then define
+Use `writing-plans`. Cite the approved architecture path and SHA-256 plus the approved `desktopSignature.sha256`, carrying the required profile/version, roots, vocabulary, public indices and discovery handoff unchanged, then define
 one independently testable vertical slice at a time with exact files, interfaces,
 test-first steps, capture checkpoints, and comparison commands. Obtain plan
 approval before creating the clean target implementation. A material folder,
@@ -98,7 +110,7 @@ deployed implementation code, use a fresh agent without that history as
 implementer. The implementer must stop when the architecture hash differs across
 the packet, component map, or execution plan.
 
-Implement only the approved desktop signature through `test-driven-development`. Keep normal runtime source free of oracle imports. Use one private reference adapter for research comparisons and a separate distribution asset resolver. Broader slices remain blocked until Gate 4.5 passes.
+Apply `web-reference-react-structure` in **new reconstruction mode** using the exact approved architecture and required role-first profile/version/roots, vocabulary, public indices and discovery handoff. Implement only the approved desktop signature through `test-driven-development`. Its existing-implementation baseline mode is not authority in this original-reference workflow and never permits the old target layout. Keep normal runtime source free of oracle imports. Use one private reference adapter for research comparisons and a separate distribution asset resolver. Broader slices remain blocked until Gate 4.5 passes.
 
 Correct the root owner that produces the mismatch. Do not add viewport-, timestamp-, or screenshot-specific overlays that merely hide a failed checkpoint.
 
@@ -142,11 +154,15 @@ Run the validator at `--stage promotion`.
 
 ## Gate 6: Promotion and catalog
 
+After the desktop signature passes, use `web-reference-react-structure` for the approved component extraction and Tailwind boundaries. Verify resolved imports, independent-content mounting, theme/source dependencies and resource cleanup. Keep the same matched parity evidence requirements after extraction; a build or fixture does not grant catalog authority.
+
 Promote only a public candidate whose implementation is reconstructed and whose parity status is verified. Keep lower states in `.reference-reconstruction/promotion.json`; never put them in `component-catalog/`.
 
-Emit one catalog entry per promoted component and bind it to the exact parity receipt. Run the validator at `--stage catalog`.
+Emit one catalog entry per promoted component and bind it to the exact parity receipt. Carry its stable identity, preferred name/aliases, role, semantic owner, source closure, named page/common import, actual use sites, examples and transfer contract through existing supported fields; unsupported mappings remain in the Markdown discovery inventory. Keep same-role implementations in different sites distinct. This handoff enables consistent ingestion but does not implement global-search UI or confer cross-project reuse. Run the validator at `--stage catalog`.
 
 ## Gate 7: Reuse proof
+
+An `examples/component-reuse` fixture verifies technical isolation and lifecycle behavior only. It cannot replace the real consumer receipt.
 
 Record `reuse-proven` only after a different real project consumes the same interface fingerprint and implementation digest without a fork. Bind a consumer receipt to both project IDs, the consumer digest, and the shared interface/implementation identities. A second route, year, variant, demo, or test fixture is not a second project.
 

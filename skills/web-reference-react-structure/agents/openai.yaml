@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web Reference React Structure"
+  short_description: "Role-first React structure with consistent UI names"
+  default_prompt: "Use $web-reference-react-structure to preserve this reconstruction's behavior while applying the required role-first library folders, shared UI vocabulary and page/common public entries."

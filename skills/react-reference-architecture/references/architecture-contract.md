@@ -35,7 +35,14 @@ each gap limits architecture or parity.
 Record:
 
 - framework, router, rendering mode, and styling strategy;
-- existing repository conventions that must remain;
+- framework/runtime conventions that must remain, and old paths that must migrate;
+- required structure profile `role-first-portable-library` v2 and vocabulary v1;
+- host application root, library root/source root, `exports/` entry directory,
+  local consumer paths and package name only when independently packaged;
+- actual page implementation keys and their route/data-example mapping;
+- applicable instruction/classification sources and versions;
+- selected scope branches: landing-page baseline plus any server-state, forms,
+  or shared-client extensions, with evidence and omitted dependencies;
 - dependency choices and rejected overlaps;
 - asset profiles and licensing constraints;
 - public/private module promotion rule.
@@ -45,24 +52,51 @@ that would cause reconsideration.
 
 ## 3. Folder structure
 
-Show an exact target-relative tree. Give every listed file or directory one clear
-responsibility. Start from the minimum useful structure, for example:
+Read [portable-structure.md](portable-structure.md) and show the exact
+role-first-portable-library v2 target-relative tree. This is the only target
+layout; an existing tree is the migration baseline, not an alternative example.
+The contract applies to standalone and parent-driven reconstructions alike.
 
-```text
-src/
-├── app/
-├── pages/{route}/
-│   ├── {Route}Page.tsx
-│   ├── {route}.data.ts
-│   └── sections/
-├── features/
-├── effects/
-├── shared/
-└── design-system/
-```
+The library source root contains the `exports/` public interface directory
+(with actual `<page-key>.ts` and `common.ts` entries) and the five implementation roles `pages`, `sections`, `components`, `elements`,
+`interactions`. Only `pages` and `sections` group by actual page keys or role-local
+`common`. The other three roles contain named modules directly, without page-key
+or `common` subdivisions. Ownership and reuse remain explicit metadata. Create
+only directories and exports with a meaningful implementation. Framework routes
+and adapters stay outside that source root. Keep Next router-reserved locations
+separate; do not put generic library UI in the host's `pages` or `src/pages`.
 
-Omit empty speculative directories. Colocate a Section's private markup, styles,
-state, motion lifecycle, and tests until a proven reuse seam exists.
+For every moved implementation, record old/new paths and affected imports,
+public symbol/Props names, local public imports or applicable package exports
+and JS/type build outputs, generated
+source locations, source ranges, examples, catalog links and evidence hashes.
+Host/package assets, global CSS and build declarations remain outside the source
+root; owner-private support code and actual type definitions remain colocated.
+Logical separation does not force a separate npm package, `packages/` directory,
+or stylesheet folder. Reuse existing host CSS for Tailwind input when suitable;
+add separate style delivery only for a concrete package requirement. List only file-specific Site
+composition exceptions and their permitted imports. No root shared/common,
+page-nested sections, catch-all public-api/index, or page-first target remains.
+
+Keep global styles/tokens in one designated location and preserve the parent's
+Tailwind rules. Exact values and statically discoverable classes must retain
+observed geometry and behavior. A structural migration preserves evidence,
+responsive substitutions and lifecycle; it does not establish reference parity.
+
+## 3a. State ownership and dependency direction
+
+List each meaningful state source, its owner, consumers, lifetime/reset, and
+persistence if any. Distinguish static content, local UI, URL, and frame state;
+include server data, forms, or shared-client state only when those branches apply.
+Do not duplicate router/query state in a client store. Treat editing drafts as
+separate intentional state with an explicit initialization and reset policy.
+
+Pages compose Sections and UI. Page-specific implementations and sibling
+Sections do not import each other's private implementation. Reusable
+modules do not import page internals, default site content, framework adapters
+or `next/*`. Whole-site assembly is limited to named Site composition files
+listed in section 3, never the whole folder or Provider. Apply these boundaries
+independently of the module's semantic kind and ownership.
 
 ## 4. Module tree and ownership
 
@@ -70,18 +104,83 @@ Show Page, Section, proven UI, effect, and controller relationships. Assign ever
 observed layer and interaction to exactly one owner. Identify client boundaries
 and lifecycle owners.
 
+### 4a. Component composition inventory
+
+Record the target project's instruction/policy source and version when supplied;
+otherwise identify the skill's semantic defaults. Classification describes
+responsibility; it does not require a physical folder layout or extend the
+component-map schema.
+
+For each Page, Section and component, provide an inventory with these columns:
+
+| Owner | Responsibility | Member or source range | Source/planned path | Reuse scope and consumers | Evidence | State/lifecycle owner |
+| --- | --- | --- | --- | --- | --- | --- |
+
+Use the responsibilities Element (요소), Interaction/animation
+(인터랙션·애니메이션), and State management (상태 관리). Explicitly mark a
+responsibility absent when no meaningful member is evidenced. Include child
+components as structural links; do not flatten them into these three categories.
+Shared components follow the same inventory. Distinguish owned children from
+usage references so one implementation does not acquire several owners.
+
+For example, a video stream remains a component: its cards and pause button are
+elements, its RAF scrolling and media controls are interaction/animation, and
+its explicit pause selection is state management. The component can own all of
+these in one file. Its frame coordinates belong to the motion lifecycle rather
+than a duplicated React store. A text-splitting renderer can be an element while
+its owning Section owns the animation. Pure URL parsing is a dependency; record
+the Page's actual query synchronization under state management.
+
+Do not infer a classification from `controller`, React hooks or CSS/JS file
+types. Record uncertain responsibilities as unresolved. Keep types, static data
+and pure helpers in the dependency closure unless a distinct meaningful
+composition responsibility is evidenced.
+
+### 4b. Naming and discovery inventory
+
+Read [ui-naming-vocabulary.md](ui-naming-vocabulary.md). For each meaningful
+Page, Section, public candidate or catalogued responsibility, record:
+
+| Project / stable item ID | Preferred/base role / actual name / aliases | Evidence and naming rationale | Semantic kind / owner / page key | Source/range and closure | Public index / package subpath / export / props type | Proven uses and route/data examples | Transfer and verification status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+
+Use vocabulary names when responsibility matches; retain useful domain qualifiers
+and private parent context. Distinguish official patterns, library conventions,
+code naming and project responsibility contracts. Preserve existing registration
+IDs; scope new IDs to the site and map architecture IDs to catalog IDs when they
+differ. Record normalized role and old-name alias search terms where existing
+tags support them, e.g. `role:carousel`, `alias:ImageCarousel`. Do not infer kind,
+shared status, or independent portability from name, folder, extension or hook.
+
+Record separate uses of the same item, data examples of the same implementation,
+and other sites' same-role implementations. Cross-project reuse requires an
+actual second consumer and independent host/lifecycle evidence, not a name match.
+For each field, identify the existing component-map/catalog mapping or state
+that it remains Markdown-only. Never silently add JSON fields. A package subpath
+is distinct from an exported symbol. The handoff must name any missing catalog
+search/index/UI work; producing this inventory does not implement global search.
+
 ## 5. Public module contracts
 
 For every public candidate and Section, record:
 
 ```text
-Name:
+Name / preferred base role / original aliases:
+Project and stable registration ID (or planned mapping):
+Source/planned path and semantic owner:
+Public index / package subpath / named symbol / Props type:
 Kind: Page | Section | UI | Effect | Controller
+Composition inventory: section 4a owner/member links
+Reuse scope and proven consumers:
+Data/route examples and same-role alternatives (distinct identities):
 Purpose:
 Interface: props, slots, events, invariants, error modes
 Owned state:
 Hidden implementation:
 Dependencies:
+Implementation file closure: private children, helpers, styles and assets
+Host requirements: router/provider, DOM targets, CSS/tokens, asset resolution
+Transfer boundary: standalone candidate | parent/host required | unresolved
 Assets:
 Responsive variants:
 Accessibility and reduced motion:
@@ -91,7 +190,17 @@ Parity checkpoints:
 Unresolved:
 ```
 
-Keep helpers and private children out of the public inventory.
+Public indices expose intended names and types with named re-exports only.
+Internal implementation imports the actual file, never its own `exports/` entries.
+Hosts and examples use the public entries. Specify local consumer imports or an
+applicable package export-map, stylesheet, asset and generator contracts together.
+
+Keep helpers and private children out of the public inventory; reference them
+from composition and implementation closure records. Kind above describes the
+technical implementation form, not a catalog mapping that turns every
+Controller into an effect or state owner. Record export and cleanup ownership
+and any concrete host mismatch requiring an adapter. Use existing interfaces
+for wrapping; public candidacy and a complete inventory do not prove portability.
 
 ## 6. TypeScript content and event models
 
@@ -151,14 +260,29 @@ implementations when the DOM or interaction model actually differs.
 ## 10. Dependency budget
 
 For every runtime dependency list owner, behavior, alternatives considered, and
-why a native/platform/existing option is insufficient. Mark dependencies that
+why a native/platform/existing option is insufficient. For selected application
+extensions, record the trigger, state/cache owner, and simpler option considered;
+use the relevant sections of [application-extensions.md](application-extensions.md).
+Treat their libraries as candidates, not a required installation list. Mark dependencies that
 are research-only and forbidden from distribution.
 
 ## 11. Verification and parity map
 
 Map each module to observable DOM, computed-style, interaction, screenshot,
 console, asset, accessibility, and GPU checks. Reuse the reference's exact
-viewport and state labels where available.
+viewport and state labels where available. For selected application extensions,
+add behavior checks for applicable loading/error/empty/success states, form
+validation, URL navigation, and store reset or persistence. Specify intended
+checks here; do not create tests while running the architecture skill.
+
+Include structural checks for the five roles, actual page keys and optional
+common under pages/sections only, direct named modules in the other three roles,
+named entries under `src/exports/`, vocabulary/export/type/example agreement, local public paths or applicable package exports and build/generator
+outputs. Require import-boundary and
+independent-data mount/unmount checks for implementation when that slice is
+allowed. Verify existing catalog mappings and identity/use/example distinctions;
+report search ingestion/UI gaps and unproven reuse explicitly. These are planned
+checks, not a new schema or permission to implement an early extraction fixture.
 
 Define the mandatory first gate in a block that maps directly to
 `component-map.json.desktopSignature.policy`; its wrapper records explicit

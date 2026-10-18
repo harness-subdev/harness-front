@@ -1,15 +1,32 @@
 ---
 name: react-reference-architecture
-description: Convert approved public-site reference evidence into a reusable React and TypeScript architecture contract before reconstruction. Use after site-reference-audit or source-backed reference analysis to define folder structure, Page and Section modules, public interfaces, design tokens, responsive substitutions, motion and GPU ownership, and parity checkpoints; stop before implementation.
+description: Use when approved public-site reference evidence needs a React and TypeScript architecture before reconstruction, including consistent role-first folders, UI names, public entry points, discovery and reuse contracts. Architecture only; not application implementation or catalog search UI.
 ---
 
-# React Reference Architecture
+# Web Reference React Architecture
 
 Translate reference evidence into the smallest React and TypeScript structure
 that can support a clean reconstruction. This skill owns architecture decisions,
 not live-site analysis and not implementation.
 
 Reply in the user's language.
+
+## Required structure and naming references
+
+Before designing paths or naming modules, read:
+
+- [references/portable-structure.md](references/portable-structure.md): required
+  `role-first-portable-library` v2 roots, five roles, page grouping through
+  Sections, direct UI module placement, named public entries under `src/exports/`, dependency boundaries and discovery handoff;
+- [references/ui-naming-vocabulary.md](references/ui-naming-vocabulary.md): v1
+  preferred names, definitions, aliases and semantic boundaries.
+
+Use this structure for every site's target, including an existing implementation
+being restructured. An older page-first/features/shared tree is migration input,
+not an alternative target. Record paths/names/exports/build transitions while
+preserving behavior; do not silently migrate or reapprove existing applications
+merely because this skill changed. The skill prepares consistent discovery data;
+it does not implement a catalog's global search screen.
 
 ## Required inputs
 
@@ -58,14 +75,50 @@ may change it to `approved`; never self-approve it.
 Do not create application source, package metadata, dependencies, assets, or
 tests while running this skill.
 
+## Scope branches
+
+Default to landing-page reconstruction: Page/Section composition, static content,
+local UI state, responsive styling, assets, and motion/render lifecycles. Do not
+add API clients, query providers, form libraries, global stores, or empty feature
+folders to a static reference merely to complete a stack.
+
+Select extensions independently from approved behavior and user requirements:
+
+| Trigger | Read only the matching section in the extension guide |
+| --- | --- |
+| Real API reads/writes or remote freshness requirements | Server state |
+| Form submission, validation, or a multi-step input flow | Forms |
+| Client-owned state shared by distant consumers or across routes | Shared client state |
+
+For any triggered extension, read
+[references/application-extensions.md](references/application-extensions.md).
+Branches compose: a contact form may need only Forms; a live search may need
+Server state and URL state but no global store. A menu, carousel, static gallery,
+or scroll effect alone does not activate these extensions. An observed form or
+account button does not authorize building a backend or integrating a service;
+record whether its approved behavior is local, mocked, or live.
+
+Record selected branches, evidence, owners, and omitted dependencies in the
+architecture packet. Stay within this skill's architecture-only scope.
+
 ## Architecture method
 
 ### 1. Preserve the target stack
 
-Follow an existing React/TypeScript repository's framework, router, styling, test,
-and naming conventions. For a new target, choose the smallest stack that meets
-the approved scope. Do not force Next.js, Vite, CSS Modules, Tailwind, GSAP,
+Follow an existing React/TypeScript repository's framework, router, styling and
+test conventions within the required structure and vocabulary. For a new target,
+choose the smallest stack that meets the approved scope. Do not force Next.js,
+Vite, CSS Modules, Tailwind, GSAP,
 Framer Motion, React Three Fiber, or any other dependency from visual style alone.
+
+Use the same role-first contract in standalone and parent-driven architecture.
+Keep framework routes/adapters outside the portable library source root; Next.js
+`pages/` is a router directory in the host. Record profile/version, vocabulary
+version, actual page keys, application/library roots and project policy sources.
+Preserve the parent's portability and Tailwind rules within those roots. Logical
+host/library separation does not require a separate npm package or `packages/`
+folder. Keep a single project unless independent packaging is actually required;
+reuse the existing host CSS for Tailwind input, tokens and base rules when suitable.
 
 Use `vercel-react-best-practices` for React/Next.js decisions when applicable.
 
@@ -80,14 +133,11 @@ Use `codebase-design` terminology and design modules with small interfaces and
 deep implementations. Organize by responsibility:
 
 ```text
-app composition
-pages
-page-owned sections
-cross-page features
-reusable effects
-shared layout and UI
-design tokens
-content and asset contracts
+framework routes and adapters outside the library
+library src/{pages,sections}/<page-key|common>
+library src/{components,elements,interactions}/<ModuleName>
+library src/exports/{<page-key>.ts,common.ts} named public entries only
+host assets/global CSS and owner-colocated support code
 ```
 
 Prefer `Page -> Section -> proven UI`:
@@ -100,7 +150,57 @@ Prefer `Page -> Section -> proven UI`:
 - Controllers, render passes, frame loops, input normalization, and asset
   resolution remain private unless a real second host needs the seam.
 
-Do not create atomic-design wrappers or barrel files merely to increase reuse.
+Colocate private content, styles, types, tests, and motion code with their owner
+inside the appropriate role. Pages compose Sections; sibling Sections do not
+import each other's internals. Reusable modules do not depend on page
+internals, default site content or framework imports. Whole-site composition is
+permitted only through the packet's named Site composition files, not a blanket
+exception for common, Provider, or the Site directory.
+Promote an effect to shared only when reuse is proven. Preserve stricter parent
+portability rules when present.
+
+Use only the required named public entries under `src/exports/`; do not create per-directory
+barrels, atomic-design wrappers, or empty modules merely to increase reuse.
+
+Choose Header, Footer, HeroSection, Carousel and other vocabulary names by actual
+responsibility. Keep useful qualifiers and original-name search aliases; align
+component/file/export/Props/hook/example names without renaming library APIs or
+changing stable registration IDs. Record naming and discovery inventory using
+the packet contract, independently of ownership, classification and reuse scope.
+
+### 2a. Record component composition and transfer boundaries
+
+Read the target project's AGENTS.md and classification policy when present.
+Record their source and version; otherwise use the semantic defaults below.
+Components contain child components and meaningful responsibilities, rather
+than competing with those responsibilities as flat categories:
+
+| Composition responsibility | Meaning | Display label |
+| --- | --- | --- |
+| Element | Meaningful UI markup and styles: button, link, text, card, media | 요소 |
+| Interaction/animation | Input responses, timed/entry/scroll motion, media control, execution and cleanup | 인터랙션·애니메이션 |
+| State management | Feature-state changes, reads, persistence and synchronization, including URL state | 상태 관리 |
+
+For each Page, Section and component, fill the composition inventory required
+by the packet contract. Give each meaningful responsibility one owner, source
+path or planned location, evidence and lifecycle; mark absent responsibilities
+as absent. A component need not contain all three. UI composition remains a
+component even when it contains state and animation. CSS, JavaScript, a hook,
+or the name `controller` does not determine classification. Pure parsing helpers,
+types and static data remain dependencies rather than invented state owners.
+
+Reuse scope is independent: page-owned and shared components use the same
+composition inventory. Record proven consumers separately from ownership.
+An independently reusable effect or state owner can remain a private or shared
+responsibility without a synthetic component wrapper. Colocation and source
+ranges are valid; these categories do not require folders, files or exports.
+
+For a transfer candidate, record its existing interface, full implementation
+file closure, styles/assets, host requirements and disposal ownership. Reuse
+that interface for wrapping; specify an adapter only for a concrete host mismatch.
+Public/shared candidacy does not establish standalone portability. Keep this
+inventory in the architecture packet; map it to existing component-map fields
+only where the supplied schema supports them. Do not silently extend that schema.
 
 ### 3. Separate content, UI state, and frame state
 
@@ -109,7 +209,11 @@ navigation, media, or other records. Keep content outside JSX when more than one
 record or viewport consumes it.
 
 Assign low-frequency UI state such as menu visibility, selected item, and route
-status to React. Keep pointer coordinates, scroll velocity, orbit angles, RAF
+status to React where locally owned; consume router-owned navigation state from
+the existing router rather than duplicating it. Keep shareable search/filter/page
+state in the URL and calculate derived values from their source. Additional
+server, form, and shared-client ownership follows the selected extension guide.
+Keep pointer coordinates, scroll velocity, orbit angles, RAF
 time, renderer state, and shader uniforms in refs or lifecycle-owned motion/render
 modules so they do not trigger frame-rate React renders.
 
@@ -172,8 +276,23 @@ it as an independently chosen requirement rather than observed reference behavio
 An architecture packet is ready for approval only when:
 
 - every in-scope page section maps to one owner;
+- the only target structure is role-first-portable-library v2, with explicit
+  roots, actual page keys and optional common only under pages/sections, and
+  direct named modules under components/elements/interactions;
+- vocabulary definitions, names, colocated types, `src/exports/` public entries, consumer import paths,
+  examples and catalog handoff agree; build/generator migration is included;
+- discovery records distinguish actual uses, data examples, same-role other-site
+  implementations and proven cross-project reuse, without inventing schema fields
+  or claiming that skill installation implements global search;
 - every effect maps to a Section, reusable effect, or global controller;
+- each component has an element, interaction/animation and state composition
+  inventory with absent responsibilities explicit, independent reuse scope,
+  and ownership distinguished from references;
+- transfer candidates name their interface, file closure, host conditions and
+  cleanup owner without speculative wrappers or portability claims;
 - every named dependency has one reason to exist;
+- selected scope branches have evidence and a single owner per state source;
+  unselected branches introduce no dependencies or speculative folders;
 - public interfaces are smaller than their hidden implementation concerns;
 - responsive substitutions and reduced-motion behavior are explicit;
 - raw research-only material is absent;

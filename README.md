@@ -17,12 +17,18 @@ Oracle, clean-room 구현, 패리티 검증, 실제 두 번째 프로젝트 재�
 | `design-system-reference-analyzer` | 승인된 런타임 아카이브와 HTML/CSS/JS 컴포넌트 계약 분석 |
 | `interactive-webgl-analysis-poc` | WebGL, Canvas, shader, scroll/time 인터랙션 분석 및 POC |
 | `react-reference-architecture` | scrubbed 증거를 React/TypeScript 구조 계약으로 변환 |
+| `web-reference-react-structure` | 승인한 구조 계약을 구현하고 기존 화면과 동작을 검증 |
 | `reference-design-document` | 검증된 구현에서 루트 `DESIGN.md` 생성·검증 |
 | `reference-project-readme` | `DESIGN.md`와 실제 프로젝트를 기준으로 루트 README 작성·검증 |
 | `web-component-motion-capture` | 실제 웹 UI 동작 촬영, 영상/poster 생성과 항목별 검증 |
 
 각 디렉터리에는 해당 스킬의 `SKILL.md`와 기존 `agents/`, `scripts/`,
 `reference(s)/`, `evals/` 리소스가 함께 들어 있습니다.
+
+구조 계약은 `role-first-portable-library` v2를 따릅니다. `pages`와 `sections`만
+페이지 키 또는 `common`으로 분류합니다. `components`, `elements`,
+`interactions`는 페이지 구분 없이 모듈을 바로 배치합니다.
+공개 진입점은 `src/exports/<page-key>.ts`와 `src/exports/common.ts`로 유지합니다.
 
 ## Install
 
