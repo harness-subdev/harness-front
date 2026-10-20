@@ -1,6 +1,6 @@
 # UI 범용 명칭 사전
 
-버전: 1. 이 파일은 react-reference-architecture가 여러 사이트에 적용하는 명칭 기준의 원본이다. 공식 레퍼런스 조사 기준일: 2026-10-15. 프로젝트 안의 명칭 사전은 이 기준을 문맥에 맞춰 참조하는 파생 사본이며 별도의 명칭 정책을 만들지 않는다.
+버전: 1. 이 파일은 web-reference-react-architecture가 여러 사이트에 적용하는 명칭 기준의 원본이다. 공식 레퍼런스 조사 기준일: 2026-10-15. 프로젝트 안의 명칭 사전은 이 기준을 문맥에 맞춰 참조하는 파생 사본이며 별도의 명칭 정책을 만들지 않는다.
 
 필수 적용 순서: 먼저 실제 의미·책임을 확인한 뒤 일치하는 대표 이름을 선택한다. 이름을 맞추기 위한 빈 폴더·래퍼·공개 export는 만들지 않는다. 폴더·공개 진입점은 [이식 가능한 소스 구조](portable-structure.md), 소유·의존성·재사용 계약은 [아키텍처 계약](architecture-contract.md)을 함께 따른다.
 
@@ -175,7 +175,8 @@ WorksIntroSection·AgencyIntroSection·DetailIntroSection처럼 실제 도메인
 | Site | 페이지와 기본 콘텐츠·호스트 환경을 조립하는 전체 사이트 진입점 | 프로젝트 책임명. 전체 사이트 조립 책임이 실제로 존재할 때 사용 |
 | Provider | 하위 구현에 호스트 조건과 컨텍스트를 제공하는 실행 기반 | 프로젝트 책임명. React 컨텍스트·호스트 제공 책임이 실제로 존재할 때 사용. 독립적인 시각 UI 패턴은 아님 |
 | Portal | 자식의 DOM 렌더 위치를 다른 곳으로 연결하는 기반 도구 | 시각 UI 자체가 아닌 구현 의존성. [MUI](https://mui.com/material-ui/react-portal/) |
-| Loader | 로딩 화면·전환 단계·종료 시점의 수명 주기를 조립하는 UI | 프로젝트 책임명. 전체 로딩 수명 주기를 조립하는 책임이 있을 때 사용 |
+| InitPage | 사이트 진입 준비·오류·종료 화면을 조립하는 Page | 신규 템플릿의 필수 Page. `pages/init/InitPage.tsx`와 `exports/init.ts`를 사용한다. 독립 URL은 필수가 아니다. |
+| Loader | 소유 Page 안에서 로딩 표시나 시퀀스를 구현하는 UI | 진입 초기화의 공개 소유자는 InitPage다. Loader는 필요할 때 비공개 하위 구현으로 둔다. |
 | Background | 배경 미디어를 구성·렌더링하는 UI | 프로젝트 책임명. 배경 렌더링 책임이 독립적으로 존재할 때 사용 |
 | CardStream | 카드 목록의 연속·순환 표시와 정지 등을 조합하는 UI | 프로젝트 책임명. 연속·순환 카드 표시 계약이 있을 때 사용. Carousel과 자동 동일시하지 않음 |
 | ViewportVideos | 표시 대상으로 등록한 영상의 화면 가시성에 따른 재생 제어 | 프로젝트 책임명. 영상 가시성 제어 책임이 있을 때 사용 |
@@ -211,7 +212,7 @@ WorksIntroSection·AgencyIntroSection·DetailIntroSection처럼 실제 도메인
 
 ## 아키텍처와 검색에 연결하는 계약
 
-react-reference-architecture는 각 모듈에 대표 이름, 실제 이름, 원본·이전 이름, 의미 분류, 소유자, 근거, 공개 경로, 실제 사용처를 기록한다. 코드명 규칙이나 프로젝트 책임명을 공식 패턴명과 구분해서 남긴다. 기존 component-map 스키마가 지원하지 않는 새 필드를 임의 추가하지 않는다.
+web-reference-react-architecture는 각 모듈에 대표 이름, 실제 이름, 원본·이전 이름, 의미 분류, 소유자, 근거, 공개 경로, 실제 사용처를 기록한다. 코드명 규칙이나 프로젝트 책임명을 공식 패턴명과 구분해서 남긴다. 기존 component-map 스키마가 지원하지 않는 새 필드를 임의 추가하지 않는다.
 
 예를 들어 대표 이름 Carousel의 항목은 `role:carousel`, `alias:ImageCarousel`, `alias:캐러셀` 같은 기존 태그 규칙으로 연결한다. `alias:slider`를 무조건 부여하지 않는다. 검색 결과에서는 같은 역할의 다른 구현과 동일 ID의 실제 사용처를 구분한다.
 

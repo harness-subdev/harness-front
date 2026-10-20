@@ -16,7 +16,7 @@ Oracle, clean-room 구현, 패리티 검증, 실제 두 번째 프로젝트 재�
 | `site-reference-audit` | 경로별 구조, 반응형, 효과, 기술 신호의 제한된 사전 조사 |
 | `design-system-reference-analyzer` | 승인된 런타임 아카이브와 HTML/CSS/JS 컴포넌트 계약 분석 |
 | `interactive-webgl-analysis-poc` | WebGL, Canvas, shader, scroll/time 인터랙션 분석 및 POC |
-| `react-reference-architecture` | scrubbed 증거를 React/TypeScript 구조 계약으로 변환 |
+| `web-reference-react-architecture` | scrubbed 증거를 React/TypeScript 구조 계약으로 변환 |
 | `web-reference-react-structure` | 승인한 구조 계약을 구현하고 기존 화면과 동작을 검증 |
 | `reference-design-document` | 검증된 구현에서 루트 `DESIGN.md` 생성·검증 |
 | `reference-project-readme` | `DESIGN.md`와 실제 프로젝트를 기준으로 루트 README 작성·검증 |
@@ -67,7 +67,7 @@ reconstruct-react-reference
 ├─ Milestone 2: Clean React/Next.js Reconstruction
 │  ├─ 기존 target·사용자 feedback correction intake
 │  ├─ scrubbed schema-v2 component-map
-│  ├─ react-reference-architecture + desktop signature policy
+│  ├─ web-reference-react-architecture + desktop signature policy
 │  ├─ 사용자 승인, SHA-256 결합, architecture stage
 │  ├─ hash-bound implementation plan
 │  ├─ fresh clean implementer의 desktop signature 우선 구현
@@ -167,7 +167,7 @@ Oracle 검증 전에는 metadata-only envelope만 허용됩니다.
 
 Oracle 통과 후 검증된 증거와 기존 target의 mismatch·사용자 feedback를
 claim ID와 checkpoint로 정리한 scrubbed schema-v2 `component-map.json`으로 바꾸고
-`react-reference-architecture`를 실행합니다.
+`web-reference-react-architecture`를 실행합니다.
 
 ### Architecture contract
 

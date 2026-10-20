@@ -11,6 +11,7 @@ Begin with YAML frontmatter:
 ```yaml
 schemaVersion: 1
 status: draft
+approvalDate: null
 projectId: "{project-id}"
 routeScope:
   - "/"
@@ -35,8 +36,10 @@ each gap limits architecture or parity.
 Record:
 
 - framework, router, rendering mode, and styling strategy;
-- framework/runtime conventions that must remain, and old paths that must migrate;
-- required structure profile `role-first-portable-library` v2 and vocabulary v1;
+- framework/runtime conventions and existing paths that must remain, plus any
+  explicitly approved path migrations;
+- structure profile `role-first-portable-library` v2 for new or reconstructed
+  target libraries and approved structural migrations, plus vocabulary v1;
 - host application root, library root/source root, `exports/` entry directory,
   local consumer paths and package name only when independently packaged;
 - actual page implementation keys and their route/data-example mapping;
@@ -52,10 +55,14 @@ that would cause reconsideration.
 
 ## 3. Folder structure
 
-Read [portable-structure.md](portable-structure.md) and show the exact
-role-first-portable-library v2 target-relative tree. This is the only target
-layout; an existing tree is the migration baseline, not an alternative example.
-The contract applies to standalone and parent-driven reconstructions alike.
+Read [portable-structure.md](portable-structure.md) and apply its canonical scope:
+new or reconstructed target libraries and explicitly approved structural migrations
+use the exact role-first-portable-library v2 target-relative tree. Within that
+scope, an existing tree is the migration baseline, not an alternative layout.
+An existing app's scoped behavior-only refactor preserves its framework, routes,
+folder layout, styles and public interfaces; apply relevant ownership and reuse
+boundaries without requiring a full migration. This scope applies to standalone
+and parent-driven work alike.
 
 The library source root contains the `exports/` public interface directory
 (with actual `<page-key>.ts` and `common.ts` entries) and the five implementation roles `pages`, `sections`, `components`, `elements`,
@@ -63,8 +70,12 @@ The library source root contains the `exports/` public interface directory
 `common`. The other three roles contain named modules directly, without page-key
 or `common` subdivisions. Ownership and reuse remain explicit metadata. Create
 only directories and exports with a meaningful implementation. Framework routes
-and adapters stay outside that source root. Keep Next router-reserved locations
-separate; do not put generic library UI in the host's `pages` or `src/pages`.
+and adapters stay outside the portable library boundary. For a new Vite-template
+target, host `app/` owns them; record its template URL, main branch, stack and
+public paths without pinning a template commit during architecture. For an
+existing host, record and preserve its actual host, route and adapter paths,
+including Next.js Pages Router or `src/app` locations, unless migration of those
+paths is explicitly approved.
 
 For every moved implementation, record old/new paths and affected imports,
 public symbol/Props names, local public imports or applicable package exports
@@ -72,18 +83,34 @@ and JS/type build outputs, generated
 source locations, source ranges, examples, catalog links and evidence hashes.
 Host/package assets, global CSS and build declarations remain outside the source
 root; owner-private support code and actual type definitions remain colocated.
-Logical separation does not force a separate npm package, `packages/` directory,
-or stylesheet folder. Reuse existing host CSS for Tailwind input when suitable;
-add separate style delivery only for a concrete package requirement. List only file-specific Site
-composition exceptions and their permitted imports. No root shared/common,
+Logical separation does not force a separate npm package or `packages/` directory.
+신규 템플릿은 `styles/portable.css`를 전달 입력으로 두며,
+문서 설정은 `app/globals.css`가 소유한다. 기존 앱은 승인한 변경 범위를 따른다. Keep Site
+composition in the host; the template registers no Site exception. No root shared/common,
 page-nested sections, catch-all public-api/index, or page-first target remains.
 
-Keep global styles/tokens in one designated location and preserve the parent's
-Tailwind rules. Exact values and statically discoverable classes must retain
-observed geometry and behavior. A structural migration preserves evidence,
-responsive substitutions and lifecycle; it does not establish reference parity.
+문서 전역 스타일과 휴대용 토큰의 소유 위치를 구분하고 부모의 Tailwind 규칙을 따른다. Exact values and statically discoverable classes must retain
+observed geometry and behavior. 구조 이전은 증거를 보존한다. 승인한 동작 수정은 기대 결과와 영향 검사를 기록한다.
+구조 이전 성공만으로 원본 일치를 증명하지 않는다.
 
-## 3a. State ownership and dependency direction
+## 3a. 필수 시작·전달 기록
+
+신규 프로젝트는 다음 표를 반드시 채운다. 설계 단계에서는 실행 예정과 완료 근거를 구분한다.
+[portable-delivery.md](portable-delivery.md)의 정확한 계약을 적용한다.
+
+| 항목 | 필수 기록 |
+| --- | --- |
+| 프로젝트 시작 | 템플릿 URL·main·clone/충돌 검사·초기/최종 npm run check의 실행 단계와 소유자 |
+| 초기화 | InitPage·init entry·readiness·완료·오류·재시도·해제·목적 URL·포커스 정책 |
+| 스타일 | styles/portable.css·호스트 globals·사이트 고유 접두사·토큰·폰트·keyframes·rem·bounds |
+| 자산 | 필수 포함 파일·콘텐츠 입력·상대 URL·미리보기 입력·실패 정책 |
+| 모션·variation | 포인터·스크롤 소유자·cleanup·접근성·실제 제공하는 variation 입력 |
+| 전달 검증 | 실제 두 TGZ의 독립 소비·CSS AB/BA·반복·부분 해제·입력 검사와 소스 ZIP 수정 검사 |
+
+전달 제작이 이번 범위 밖이면 후속 작업의 소유자·입력·완료 근거를 명시한다.
+검사 전에는 혼합 소비를 검증 완료로 표시하지 않는다.
+
+## 3b. State ownership and dependency direction
 
 List each meaningful state source, its owner, consumers, lifetime/reset, and
 persistence if any. Distinguish static content, local UI, URL, and frame state;
@@ -94,8 +121,10 @@ separate intentional state with an explicit initialization and reset policy.
 Pages compose Sections and UI. Page-specific implementations and sibling
 Sections do not import each other's private implementation. Reusable
 modules do not import page internals, default site content, framework adapters
-or `next/*`. Whole-site assembly is limited to named Site composition files
-listed in section 3, never the whole folder or Provider. Apply these boundaries
+or React Router. Whole-site assembly belongs to the recorded host location,
+which is `app/` in the new Vite template. Preserve the existing host's framework
+composition paths. Lower UI roles may compose one another without a fixed
+hierarchy; owner-private access and module cycles remain forbidden. Apply these boundaries
 independently of the module's semantic kind and ownership.
 
 ## 4. Module tree and ownership
@@ -275,7 +304,7 @@ add behavior checks for applicable loading/error/empty/success states, form
 validation, URL navigation, and store reset or persistence. Specify intended
 checks here; do not create tests while running the architecture skill.
 
-Include structural checks for the five roles, actual page keys and optional
+Within the approved structural scope, include checks for the five roles, actual page keys and optional
 common under pages/sections only, direct named modules in the other three roles,
 named entries under `src/exports/`, vocabulary/export/type/example agreement, local public paths or applicable package exports and build/generator
 outputs. Require import-boundary and
@@ -346,8 +375,8 @@ the approved first slice remains implementation-blocking.
 
 ## Approval record
 
-After explicit approval, append the approval date and a SHA-256 of the exact
-approved file. Bind the schema-v2 signature policy and run the parent validator's
-`--stage architecture` before writing a plan or implementation. Downstream plans
-must cite that hash. A material architecture
-change invalidates the approval and requires a new hash and approval record.
+After explicit approval, record `status: approved` and the approval date in the
+architecture document. Plans and component-map reference its path; no design-document
+hash is required. Bind the schema-v2 signature policy digest and run the parent's
+`--stage architecture` before writing a plan or implementation. A material change
+returns the architecture and affected plan to review and requires approval again.

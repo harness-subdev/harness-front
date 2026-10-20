@@ -57,14 +57,14 @@ Include the correction intake's current claims and unresolved conditions. Assign
 
 Use component-map `schemaVersion: 2` and add `desktopSignature: { status, sha256, policy }` before approval. Set status to `approved` only with explicit approval and bind `sha256` to recursively canonicalized policy JSON. For every checkpoint the policy locks input/state/readiness/reduced-motion/time/randomness controls; the ordered IDs, count, kinds, root owners, and implementation file closure of every observed surface; the comparison method, tolerance, metric IDs/units/maxima; and, for GPU surfaces, context API/version and expected shader, program or pipeline, framebuffer or attachment, pass-order, and texture counts. Choose the smallest slice that exercises the reference's defining behavior. Preserve multiplicity: three observed WebGL2 canvases are three named surfaces, never one generic `webgl2` kind. If WebGL, WebGL2, or WebGPU owns that behavior, the signature must include that surface rather than a CSS, DOM, SVG, or Canvas2D stand-in.
 
-Then run `react-reference-architecture` with the scrubbed component map, public
+Then run `web-reference-react-architecture` with the scrubbed component map, public
 screenshots, observable checkpoints, normalized data contracts, and explicit
 uncertainty. Create `.reference-reconstruction/react-architecture.md` with exact
 folder structure, Page/Section/proven-UI modules, TypeScript content interfaces,
 design tokens, responsive substitutions, state ownership, motion/renderer seams,
 dependency budget, implementation slices, and parity checkpoints.
 
-Before approval, apply [web-reference-react-structure](../../web-reference-react-structure/SKILL.md), its [architecture contract](../../web-reference-react-structure/references/architecture.md), the canonical [portable structure](../../react-reference-architecture/references/portable-structure.md) and [UI naming vocabulary](../../react-reference-architecture/references/ui-naming-vocabulary.md) as structural constraints on this packet:
+Before approval, apply [web-reference-react-structure](../../web-reference-react-structure/SKILL.md), its [architecture contract](../../web-reference-react-structure/references/architecture.md), the canonical [portable structure](../../web-reference-react-architecture/references/portable-structure.md) and [UI naming vocabulary](../../web-reference-react-architecture/references/ui-naming-vocabulary.md) as structural constraints on this packet:
 
 - Require profile `role-first-portable-library`, version 2. Record host application, library and source roots, vocabulary version and applicable project policy. An existing layout is migration input, not another target profile.
 - The library source uses five implementation roles `pages`, `sections`, `components`, `elements`, `interactions`, plus an `exports/` interface directory. Only `pages` and `sections` group by actual page key or optional `common/`; `components`, `elements`, and `interactions` contain named modules directly without page/common subdivisions. Keep semantic page → section → private child ownership; do not nest role directories inside Pages or create root `features`/`shared`/`common` implementations.

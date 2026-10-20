@@ -17,9 +17,9 @@ test('routes full reference work through the approved lifecycle', async () => {
   assert.match(skill, /Clean application files begin only after Oracle validation passes/);
   assert.match(skill, /metadata-only validation envelope/);
   assert.match(skill, /site-reference-audit/);
-  assert.match(skill, /react-reference-architecture/);
+  assert.match(skill, /web-reference-react-architecture/);
   assert.ok(
-    skill.indexOf('site-reference-audit') < skill.indexOf('react-reference-architecture'),
+    skill.indexOf('site-reference-audit') < skill.indexOf('web-reference-react-architecture'),
     'scoped audit must precede React architecture',
   );
   assert.equal((lifecycle.match(/^## Milestone [1-3] - /gm) ?? []).length, 3);

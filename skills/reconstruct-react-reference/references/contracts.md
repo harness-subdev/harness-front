@@ -64,7 +64,7 @@ Artifact paths are relative to `oracleRoot`. Every unresolved entry requires a u
 
 `.reference-reconstruction/react-architecture.md` is created only after the
 Oracle stage passes. It follows the contract owned by
-`react-reference-architecture` and begins in `draft` state. Explicit approval
+`web-reference-react-architecture` and begins in `draft` state. Explicit approval
 changes the exact revision to `approved` and records its SHA-256. The file must
 remain scrubbed of bundle bodies, minified identifiers, deployed implementation
 structure, research-only assets, and Oracle imports.

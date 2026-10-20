@@ -31,8 +31,8 @@ Trigger: approved behavior reads/writes remote data. Determine separately whethe
 it needs a client cache. A server-rendered content page or single submission does
 not automatically justify a query library.
 
-1. Preserve the framework and its existing data/mutation conventions. Next.js
-   App Router remains the router; do not add a SPA router for this extension.
+1. Preserve the framework and its existing data/mutation conventions. React Router
+   remains host-owned in the React/Vite template; do not add a second router.
 2. Use existing framework facilities or native fetch when sufficient. Shared
    HTTP handling belongs in a small existing client, only when repetition
    justifies it. Define non-success response, cancellation, and parse failures.
@@ -156,5 +156,5 @@ skill specifies checks; downstream implementation creates and runs them.
 - [TanStack Query server state](https://tanstack.com/query/latest/docs/framework/react/overview)
 - [React Hook Form](https://react-hook-form.com/get-started) and [Zod](https://zod.dev/)
 - [Zustand](https://zustand.docs.pmnd.rs/getting-started/introduction), [Jotai](https://jotai.org/), and [Redux guidance](https://redux.js.org/style-guide/)
-- [Next.js project conventions](https://nextjs.org/docs/app/getting-started/project-structure)
+- [Vite guide](https://vite.dev/guide/)
 - [Vitest](https://vitest.dev/guide/), [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/), and [MSW](https://mswjs.io/docs/)

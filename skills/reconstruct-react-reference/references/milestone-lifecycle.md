@@ -67,7 +67,7 @@ Exit only when a separate project consumes the promoted implementation successfu
 - Do not create one phase per route, component, or data record.
 - Split template families only when renderer, interaction, evidence, or failure risk warrants an independent gate.
 - Each phase receives its own approved brainstorming record and writing plan before implementation.
-- Milestone 2 clean implementation also requires an approved `react-reference-architecture` packet bound to the component map and execution plan by exact SHA-256. Create it only after the Oracle stage passes.
+- Milestone 2 clean implementation also requires an approved `web-reference-react-architecture` packet bound to the component map and execution plan by exact SHA-256. Create it only after the Oracle stage passes.
 
 ## Management and implementation rails
 

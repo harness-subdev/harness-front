@@ -1,4 +1,4 @@
 interface:
   display_name: "Web Reference React Structure"
-  short_description: "Role-first React structure with consistent UI names"
-  default_prompt: "Use $web-reference-react-structure to preserve this reconstruction's behavior while applying the required role-first library folders, shared UI vocabulary and page/common public entries."
+  short_description: "템플릿 필수 시작과 휴대용 React 구현·전달 검증"
+  default_prompt: "Use $web-reference-react-structure. 신규 복원은 승인된 구현 단계에서 template main을 clone하고 충돌 확인 뒤 추적 파일만 복사한다. 실제 commit을 기록하고 초기·최종 npm run check를 통과한다. InitPage·portable.css·다중 TGZ 계약을 적용한다. 기존 앱은 승인한 범위에서 수정하며 동작 보존으로 수정 지시를 막지 않는다."
