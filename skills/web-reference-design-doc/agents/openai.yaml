@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reference Design Document"
+  short_description: "Create verified reconstruction design contracts"
+  default_prompt: "Use $web-reference-design-doc to create or validate the root DESIGN.md from the reconstructed implementation and current verification evidence."

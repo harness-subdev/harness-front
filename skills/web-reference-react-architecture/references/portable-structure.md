@@ -4,7 +4,7 @@ Profile: `role-first-portable-library`. Version: **2**.
 
 This is the required source layout for new or reconstructed target libraries and
 explicitly approved structural migrations designed by web-reference-react-architecture
-and implemented by web-reference-react-structure. For an existing app's scoped
+and implemented by web-reference-react-structure. For an existing non-Next.js app's scoped
 behavior-only refactor, preserve its framework, routes, folder layout, styles and
 public interfaces. Apply relevant ownership and reuse boundaries without requiring
 a full migration. Within an approved structural migration, an older tree is
@@ -14,6 +14,8 @@ Changing this skill does not itself migrate existing projects or reapprove their
 architecture packets. For a structural migration, revise and rebind an approved
 old-layout packet under this contract before source changes; retain the parent's
 approval, Oracle and signature gates when applicable.
+Existing Next.js targets follow the [React + Vite porting procedure](#nextjs-to-vite-port)
+below; the existing-stack preservation rules apply to other hosts.
 
 ## Required roots and layout
 
@@ -59,7 +61,7 @@ requirement; its portable source follows the same layout. 신규 템플릿은
 Component styles remain Tailwind classes beside their DOM.
 
 In the Vite template, host `app/` owns BrowserRouter routes, content and adapters.
-Existing hosts retain their current framework router, adapter and route-file
+Existing non-Next.js hosts retain their current framework router, adapter and route-file
 locations; introducing a portable library does not replace them with BrowserRouter.
 Portable `src/` never imports React Router or host framework routing. Do not
 introduce a second Page wrapper when the route only passes data and adapters to
@@ -106,7 +108,8 @@ a directory when no cohesive supporting implementation needs colocation.
 이 절은 복원 설계와 예제 제작이 함께 참조하는 공통 계약이다.
 신규 복원 결과와 승인한 구조 이전의 목표는 React·Vite에서 독립 실행한다.
 원본 프레임워크가 달라도 관찰한 화면·동작·URL 동작을 보존한다.
-기존 앱의 작은 수정에는 프레임워크·폴더 이전을 적용하지 않는다.
+Next.js가 아닌 기존 앱의 작은 수정에는 프레임워크·폴더 이전을 적용하지 않는다.
+기존 Next.js 앱은 아래 포팅 절차에 따라 React·Vite 목표를 설계한다.
 
 신규 목표의 실행 경로는 다음과 같다.
 
@@ -283,7 +286,7 @@ retroactively register existing sites.
 
 For new or reconstructed target libraries and approved structural migrations,
 the architecture/implementation handoff must establish the following. A scoped
-behavior-only refactor instead preserves its existing host/layout and applies
+behavior-only refactor of a non-Next.js app instead preserves its existing host/layout and applies
 the relevant ownership, reuse and verification checks without a full migration.
 
 1. Exactly this profile/version and explicit application/library roots, without
@@ -304,9 +307,40 @@ Architecture specifies these checks. It does not create application files or
 run an implementation fixture before the parent workflow permits that slice.
 
 
+## Next.js to Vite port
+
+기존 Next.js 프로젝트는 React + Vite 포팅 대상으로 안내한다.
+Next.js라는 이유로 기존 스택 보존 예외를 적용하지 않는다.
+이미 받은 포팅 승인은 재사용한다. 포팅 범위가 미정이면 필요한 변경과 결정을 먼저 제시한다.
+스킬 수정만으로 앱을 바꾸거나 기존 설계서를 자동 승인하지 않는다.
+상위 워크플로의 Oracle·설계 승인·signature 검증 단계는 유지한다.
+
+1. 현재 화면·인터랙션·URL·자산·수명 주기와 호출부를 기록한다.
+   원본 Next.js 경로는 비교 기준이며 목표 폴더 구조가 아니다.
+2. 목표는 아래 지정 템플릿의 React·Vite·TypeScript strict·Tailwind CSS·React Router·GSAP·`@gsap/react`다.
+   호스트는 `app/`, 휴대용 UI는 `src/`에 두고 v2 역할 구조를 적용한다.
+3. 경로·중첩 layout·동적 경로·query·hash·404·redirect를 React Router와 호스트 동작에 대응한다.
+   `next/link`·`next/navigation`·`next/image`·`next/font`·metadata의 사용처와 대체 방식을 기록한다.
+   이미지 크기·폰트·SEO 요구도 대응표에 포함한다.
+4. Server Components·SSR/SSG/ISR·Server Actions·API routes·middleware·인증·서버 환경 변수의 의존성을 확인한다.
+   서버 기능은 기존 API 또는 범위에 맞는 서버 대안으로 연결한다.
+   비밀 값·권한 검사·서버 코드는 브라우저로 옮기지 않는다.
+   공개 환경 변수만 Vite 클라이언트 설정으로 대응한다.
+   서버 계약이나 기능 변경 결정이 없으면 영향받는 작업을 차단 조건으로 남긴다.
+5. architecture는 원본→목표 경로·공개 API·콘텐츠·서버 책임·검증 기준을 설계서에 기록한다.
+   설계서 승인 후 `writing-plans`로 인계한다. 승인한 구현 단계에서 structure가 실제 포팅을 수행한다.
+   설계 단계에서 clone·의존성 설치·앱 코드 변경을 실행하지 않는다.
+6. 아래 clone·충돌 검사 절차로 별도 빈 목적지에 템플릿을 준비한다.
+   기존 앱을 덮어쓰거나 삭제하지 않는다. 검증한 목표로 전환하는 범위와 원본 보존 위치를 기록한다.
+   초기·최종 `npm run check`와 InitPage·portable CSS 계약을 적용한다.
+7. 연결 Chrome에서 직접 URL 진입·새로고침·뒤로/앞으로·query·수정키 링크·반응형·모션·해제를 기존 기준과 비교한다.
+   서버 기능이 있으면 인증·요청 성공/실패도 확인한다.
+   Vite base·router basename·자산 경로와 배포 호스트의 SPA fallback을 확인한다.
+   빌드 성공만으로 동작 동등성이나 서버 기능 이전을 완료했다고 판정하지 않는다.
+
 ## Required template and project start
 
-New projects start from `https://github.com/harness-subdev/reference-template`,
+New projects and Next.js port targets start from `https://github.com/harness-subdev/reference-template`,
 private template, default branch `main`. Stack: React, Vite, TypeScript strict,
 Tailwind, React Router, GSAP, @gsap/react, npm, ESLint and Prettier. Host root is
 `app/`, portable library root/source is `src/`, entries are `src/exports/`.

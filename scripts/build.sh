@@ -15,9 +15,9 @@ mkdir -p dist
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
 git archive HEAD | tar -xf - -C "$stage"
-node --test "$stage"/scripts/*.test.mjs "$stage"/skills/design-system-reference-analyzer/scripts/*.test.mjs "$stage"/skills/reconstruct-react-reference/scripts/*.test.mjs "$stage"/skills/interactive-webgl-analysis-poc/evals/*.test.mjs
-node "$stage/skills/design-system-reference-analyzer/scripts/extract-reference-graph.regression-test.mjs"
-node "$stage/skills/interactive-webgl-analysis-poc/scripts/test-tools.mjs"
+node --test "$stage"/scripts/*.test.mjs "$stage"/skills/web-reference-design-system-analysis/scripts/*.test.mjs "$stage"/skills/web-reference-workflow/scripts/*.test.mjs "$stage"/skills/web-reference-webgl-poc/evals/*.test.mjs
+node "$stage/skills/web-reference-design-system-analysis/scripts/extract-reference-graph.regression-test.mjs"
+node "$stage/skills/web-reference-webgl-poc/scripts/test-tools.mjs"
 BUILD_VERSION="$version" BUILD_SHA="$sha" BUILD_STAGE="$stage" node --input-type=module <<'JS'
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';

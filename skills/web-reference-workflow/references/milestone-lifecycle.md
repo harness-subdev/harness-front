@@ -1,0 +1,91 @@
+# Full Reference Reconstruction Lifecycle
+
+Use this reference when the request covers a full site, multiple milestones, original-runtime restoration, React/Vite reconstruction, component extraction, or cross-project distribution. Select exactly one current milestone from evidence that exists on disk. Do not select a milestone from intent alone.
+
+## Select the current milestone
+
+- Select Milestone 1 until a replayable Oracle is complete, required runtime and GPU evidence is resolved, and the Oracle lock passes validation.
+- Select Milestone 2 only after the Oracle lock passes and while clean reconstruction, parity receipts, or project-catalog promotion remain incomplete.
+- Remain in or return to Milestone 2 when an existing-target baseline mismatch or accepted user feedback invalidates reconstruction parity. Return to Milestone 1 only when the correction exposes incomplete or incorrect locked Oracle evidence.
+- Select Milestone 3 only after promoted candidates exist and the work has moved to a real second-project consumer or distribution validation.
+- M1 may create a metadata-only validation envelope containing the project marker and Oracle lock because the Oracle-stage validator requires that binding. This envelope is not the clean application target.
+- Clean application files, package metadata, and target dependencies begin only after Oracle validation passes. Keep the immutable Oracle and future clean application in separate sibling projects with separate dependency graphs.
+- A route, locale, query state, variant, fixture, demo, or specimen inside the source project is not cross-project reuse.
+
+## Milestone 1 - Original runtime oracle
+
+**Goal:** Preserve the complete public runtime as replayable, immutable evidence before authoring a replacement.
+
+Default phases:
+
+1. Full-site scope and checkpoints — use `web-reference-site-audit` as preflight-only route, locale, query, viewport, interaction, authority, and rights reconnaissance; it does not satisfy Oracle closure and is not written into the target envelope.
+2. Public runtime archive and local mirror — exact response bytes, request identity, runtime-discovered assets, and manifest-aware replay.
+3. Runtime/GPU evidence and Oracle lock — interaction graph, pre-navigation renderer traces, semantic render contracts, required unresolved closure, and hash lock.
+
+Exit only when the local replay is healthy, required source and runtime evidence is complete, applicable GPU evidence is runtime-validated, blocking unresolved entries are empty, and the Oracle validator passes.
+
+## Milestone 2 - Clean React/Vite reconstruction
+
+**Goal:** Build the separate React + Vite target from the locked Oracle in the selected implementation mode and promote only evidence-backed reusable candidates.
+
+Existing Next.js applications follow the [canonical porting procedure](../../web-reference-react-architecture/references/portable-structure.md#nextjs-to-vite-port).
+Reuse existing port authorization and record source/target paths, route/server
+mappings, template clone and initial/final checks in architecture and plan.
+Preserve the original Next.js Oracle as read-only evidence; it is not a Vite target.
+
+Follow [implementation-boundary.md](implementation-boundary.md): authorized source-derived ports use `source-port`; an explicit independence requirement or governing rule selects `strict-clean-room`. Record the mode and implementer boundary in architecture and plan Markdown. "Clean" describes target/Oracle separation. Only `strict-clean-room` requires the independent-authorship process; `source-port` retains the source-aware implementer and makes no independent-authorship claim.
+
+Use `Page -> Section -> proven UI`:
+
+- Host `app/` owns routing, SEO and locale inputs. Page owns Section ordering and page composition, receiving route/content inputs from the host.
+- Section is the primary reusable unit. It owns its content contract, state, inputs, responsive behavior, asset readiness, fallback, animation lifecycle, and cleanup.
+- UI is public only when two Section consumers prove repetition, or when independent consumption has clear value. Do not wrap native elements merely to increase component count.
+- Keep controllers, renderer passes, per-frame state, input normalization, and archive resolvers private. Expose an adapter only after two real hosts require the seam.
+
+Every public candidate has two integration profiles:
+
+- `Standalone` is the default. It works without a Provider, global CSS, source DOM ancestors, the Oracle, or the original host. It includes semantic DOM, keyboard/touch/pointer behavior, responsive styles, reduced-motion behavior, asset failure handling, and cleanup.
+- `Immersive Runtime` is optional. A host may install a Provider to share scroll, navigation, pointer, preload, audio, route transition, or canvas services. Absence of the Provider must fall back to Standalone behavior.
+
+Default phases:
+
+1. Existing-target baseline mismatch intake, approved React architecture packet plus schema-v2 desktop-signature policy and selected implementation mode, successful architecture-stage validation, component design, and only then planning and the mode-specific implementer handoff.
+2. Desktop-primary signature implementation and matched proof at the locked route, viewport, DPR, per-checkpoint input/state/readiness/reduced-motion/time/randomness controls, ordered renderer surface identities, comparison criteria, and parsed structured GPU status. Fix failures in the recorded root owner; do not begin broader slices or compensate with CSS/DOM/screenshot overlays.
+3. After the signature gate passes, vertical reconstruction or correction slices grouped by shared Page template, root owner, and behavior risk, not one phase per route.
+4. Matched recapture and correction loops, Standalone validation, fresh parity receipts, promotion records, and project catalog.
+
+Exit only when the desktop signature receipt passes and every promoted candidate satisfies the selected implementation boundary, is parity-verified, Standalone-tested, bound to current interface and implementation digests, and present in the project catalog. `strict-clean-room` additionally requires its recorded independent-authorship process boundary; source-port receipts do not claim independent authorship. The latest accepted user feedback must be represented in the current claim set and by a later matched recapture. No affected promotion may retain `parityStatus: stale` or `unverified`, and no affected component may retain an unresolved correction item. Failed, blocked, and unresolved candidates remain outside the catalog.
+
+## Milestone 3 - Proven cross-project design system
+
+**Goal:** Turn promoted project candidates into a reusable package proven by a real consumer and safe technical distribution checks.
+
+Default phases:
+
+1. Public package, tokens, content schemas, states, variants, fallbacks, and executable specimens.
+2. Real second-project reuse proof using the same interface and implementation without a fork.
+3. Distribution validation using owned or licensed assets, current receipts, package digests, and forbidden-content scans.
+
+Exit only when a separate project consumes the promoted implementation successfully and the distribution validator finds no research-only asset, Oracle path, original host, or stale digest. Technical validation is not legal approval.
+
+## Phase sizing
+
+- One phase produces one externally verifiable outcome.
+- Do not create one phase per route, component, or data record.
+- Split template families only when renderer, interaction, evidence, or failure risk warrants an independent gate.
+- Each phase receives its own approved brainstorming record and writing plan before implementation.
+- Milestone 2 clean implementation also requires an approved `web-reference-react-architecture` packet linked by approved path/status to the component map and execution plan. Create it only after the Oracle stage passes.
+
+## Management and implementation rails
+
+GSD is the management rail only: project onboarding, milestone lifecycle, phase list, progress, audit, summary, and completion.
+
+The implementation rail is:
+
+`brainstorming -> writing-plans -> test-driven-development when code changes -> implement or subagent-driven-development -> code-review -> verification-before-completion`
+
+Do not use `gsd-discuss-phase`, `gsd-plan-phase`, or `gsd-execute-phase` unless the user explicitly requests GSD-native phase execution.
+
+## Hard stops
+
+Stop without overwriting the last valid artifact when authority is missing, required source/runtime evidence is absent, the Oracle hash changes, the target points to another Oracle, a legacy component map has not been explicitly migrated, architecture validation has not passed before planning, applicable structured GPU validation is incomplete, the desktop signature is missing/stale/failed, broader implementation begins before signature proof, a required claim is unresolved, accepted user feedback has not been mapped to an affected component, a correction remains unresolved, an affected promotion retains `parityStatus: stale`, Standalone fails, receipt bindings are stale, or research-only material reaches a distribution root.

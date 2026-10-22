@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web Reference Workflow"
+  short_description: "Restore references into reusable React systems"
+  default_prompt: "Use $web-reference-workflow to run a scoped audit, close the Oracle, intake any existing reconstruction mismatch or user feedback, explain React + Vite porting for existing Next.js targets, approve the template-based React/Vite and TypeScript architecture, and execute an evidence-locked correction and reconstruction loop with fresh parity and reuse proof."

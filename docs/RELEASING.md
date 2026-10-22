@@ -53,6 +53,8 @@ cp -R harness-front-release/skills/* "${CODEX_HOME:-$HOME/.codex}/skills/"
 ```
 
 동일 이름의 설치 스킬은 갱신됩니다. 사용자 수정본이 있으면 먼저 백업하세요.
+`0.3.0`은 스킬 이름 여섯 개를 `web-reference-*`로 바꿉니다.
+이전 설치의 중복 탐색을 피하는 절차는 [README](../README.md#v030-설치-이름-변경)를 따르세요.
 
 ## 실패와 재실행
 
