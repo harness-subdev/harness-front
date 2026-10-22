@@ -143,6 +143,13 @@ If runtime evidence assigns an exact checkpoint to WebGL, WebGL2, or WebGPU, a
 Canvas2D, DOM, SVG, or CSS substitute is a fidelity downgrade rather than a
 smaller equivalent implementation.
 
+### 1a. 실행·콘텐츠 연결
+
+설계 전에 [실행·콘텐츠·예제 연결 계약](references/portable-structure.md#실행콘텐츠예제-연결-계약)을 적용한다.
+[설계서의 실행·예제 연결 기록](references/architecture-contract.md#3c-실행예제-연결-기록)을 채운다.
+신규 복원과 승인한 구조 이전은 React·Vite 목표의 `app/main.tsx → App → 공개 Page` 연결을 설계한다.
+기존 앱의 작은 수정은 승인한 호스트·경로를 보존한다.
+
 ### 2. Define deep modules
 
 Use `codebase-design` terminology and design modules with small interfaces and
@@ -299,6 +306,7 @@ not authorize structural migration.
 - 신규 프로젝트의 template clone·초기/최종 `npm run check`를 필수 구현 단계로 지정한다;
 - InitPage의 준비·실패·재시도·완료·해제와 호스트 소유권을 명시한다;
 - portable CSS·자산·모션·variation 경계와 실제 두 TGZ 후속 검증 작업을 기록한다;
+- 실행·예제 연결 기록에 실제 콘텐츠·호스트 소유자·분석 입력·대상별 호출부와 미확정 조건을 명시한다;
 - every in-scope page section maps to one owner;
 - the only target structure is role-first-portable-library v2, with explicit
   roots, actual page keys and optional common only under pages/sections, and

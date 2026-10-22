@@ -131,11 +131,15 @@ variation은 콘텐츠, 외형, 상태, 동작으로 나눠 실제 구현한 입
 
 architecture는 아래 작업의 입력·소유자·성공 조건을 설계서에 남긴다.
 structure는 승인한 전달 범위에서 실제 제작기와 검증 소비자를 재사용해 실행한다.
-WrapperClient 작업은 기존 `sites:package`, `packageSite`, `verifyConsumer` 흐름을 확장한다.
+Rapper 제작은 별도 `wrapper-packages` checkout의 `pnpm project:release`와 기존 예제 호스트·패키징·독립 소비 검증을 재사용한다.
+실제 `package.json`과 제작 스킬에서 명령·인자를 확인한다. 앱에서 제거한 `sites:package`를 안내하지 않는다.
 템플릿에 별도 패키지 제작기나 레지스트리를 만들지 않는다.
 
 | 작업 | 완료 근거 |
 | --- | --- |
+| 실행·예제 연결 | [공통 연결 계약](portable-structure.md#실행콘텐츠예제-연결-계약)의 실제 호출·콘텐츠·호스트 파일을 추적하고 분석 입력 포함을 확인한다. |
+| 대상·case 대조 | 대상별 생성 case와 TGZ `./preview/<case>` entry를 대조한다. 누락 원인·소스 위치를 기록하며 실행 대상 누락은 준비 완료를 막는다. |
+| 개별 실행 | 실제 콘텐츠·입력·해제를 Chrome에서 확인한다. 부모 DOM·형제 미디어가 필요하면 기록한 최소 구성을 사용한다. 미확정 서버 입력은 준비 방법과 미검증 상태를 남긴다. |
 | 두 실제 archive 선택 | Studio375·Realevate TGZ 각각의 source revision·version·SHA-256·공개 API·호스트 조건 |
 | 독립 소비 | 새 소비자에 두 TGZ를 설치하고 공개 API·타입·컴파일 CSS·포함 폰트로 빌드한다. 원본 서버를 끈다. |
 | 같은 문서 혼합 | Studio375 Hero·필요한 배경과 Realevate ContactForm을 같은 문서에 조립한다. 사용한 API만 검사한다. |

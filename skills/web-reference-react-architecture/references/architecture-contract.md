@@ -127,6 +127,24 @@ composition paths. Lower UI roles may compose one another without a fixed
 hierarchy; owner-private access and module cycles remain forbidden. Apply these boundaries
 independently of the module's semantic kind and ownership.
 
+## 3c. 실행·예제 연결 기록
+
+[실행·콘텐츠·예제 연결 계약](portable-structure.md#실행콘텐츠예제-연결-계약)을 적용한다.
+신규 복원과 승인한 구조 이전에서는 아래 기록을 필수로 남긴다.
+기존 앱의 작은 수정은 영향받는 연결만 기록하며 기존 실행 구조를 보존한다.
+설계 단계의 예정 경로와 제작 단계에서 확인한 파일을 구분한다.
+
+- 실행 경로: 실제 앱 루트, HTML, bootstrap, App, 공개 entry, Page와 하위 UI.
+- 콘텐츠 연결: 값의 원천 파일·심볼, 전달 props, 페이지 기본값 소유 위치와 교체 방법.
+- 호스트 연결: router·Provider·DOM/ref·callback의 소유자, 연결 위치와 해제 책임.
+- 분석 입력: 실행 호스트·호출부·콘텐츠 파일의 포함 근거 또는 확인할 제작 단계와 소유자.
+- 대상별 예제: 대상 식별자, 실제 호출부 또는 실행 예제 경로, 입력과 필요한 최소 부모·형제 구성.
+- case 대조: 대상별 생성 case·패키지 entry 또는 누락 원인·소스 위치·남은 준비 조건.
+
+별도 bootstrap이나 중첩 앱도 같은 기록을 사용한다. 새 JSON 필드나 별도 레지스트리를 만들지 않는다.
+제작 전에는 case 대조를 후속 작업으로 표시한다. 실행 대상의 누락이 남으면 미리보기 준비 완료로 판정하지 않는다.
+서버 입력은 확보 방법과 미검증 상태를 적는다. 전체 사이트·개별 미리보기·ZIP·TGZ·원본 일치는 각각 증거를 연결한다.
+
 ## 4. Module tree and ownership
 
 Show Page, Section, proven UI, effect, and controller relationships. Assign every

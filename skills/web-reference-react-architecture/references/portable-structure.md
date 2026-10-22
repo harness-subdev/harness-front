@@ -26,7 +26,12 @@ A single-project Vite layout can keep logical host and library boundaries:
 
 ```text
 <project>/
+├─ index.html                        Vite entry document
 ├─ app/                              Host entry, routing, content and adapters
+│  ├─ main.tsx                       React bootstrap
+│  ├─ App.tsx                        Routing, providers and public Page assembly
+│  ├─ content/                       Site content, only when needed
+│  ├─ adapters/                      Concrete host connections, only when needed
 │  └─ globals.css                    Document defaults; imports portable CSS
 ├─ styles/portable.css              Prefixed portable Tailwind input
 ├─ src/                              Portable UI source root
@@ -95,6 +100,40 @@ Page files use `<Name>Page.tsx`; page regions use `<Name>Section.tsx`. Ordinary
 support files use readable kebab-case, such as `viewport-scroll.ts`,
 `carousel-motion.ts`, or `home.data.ts`. A component can remain one file without
 a directory when no cohesive supporting implementation needs colocation.
+
+## 실행·콘텐츠·예제 연결 계약
+
+이 절은 복원 설계와 예제 제작이 함께 참조하는 공통 계약이다.
+신규 복원 결과와 승인한 구조 이전의 목표는 React·Vite에서 독립 실행한다.
+원본 프레임워크가 달라도 관찰한 화면·동작·URL 동작을 보존한다.
+기존 앱의 작은 수정에는 프레임워크·폴더 이전을 적용하지 않는다.
+
+신규 목표의 실행 경로는 다음과 같다.
+
+```text
+index.html → app/main.tsx → app/App.tsx → src/exports/<page-key>.ts → 공개 Page → 하위 UI
+                                      ↳ 실제 콘텐츠·router·Provider·호스트 연결
+```
+
+`main.tsx`는 React root 생성과 전역 CSS 연결을 담당한다.
+`App`은 라우팅·Provider를 조립하고 실제 콘텐츠·호스트 입력을 공개 Page API로 전달한다.
+사이트 콘텐츠는 필요한 경우 `app/content/`에 둔다.
+페이지 기본 콘텐츠는 페이지 소유 파일에 둘 수 있다. 경로 통일 때문에 복제하지 않는다.
+기본값을 쓰면 소유 위치와 props 교체 방법을 기록한다.
+예제에 데이터를 전달하려고 모든 정적 데이터를 공개 API로 승격하지 않는다.
+router·Provider·ref·callback의 소유자와 연결 위치도 기록한다.
+
+설계서의 [실행·예제 연결 기록](architecture-contract.md#3c-실행예제-연결-기록)에 실제 경로와 입력을 남긴다.
+사이트 실행과 예제 제작은 같은 소스의 실제 콘텐츠·호출 관계를 사용한다.
+각 미리보기 대상은 실제 호출부 또는 실행 예제를 지정한다.
+중첩 앱은 실행 루트·bootstrap·별도 호스트와 콘텐츠 파일이 분석 입력에 포함되는지 확인한다.
+폴더 이름이나 전체 사이트 빌드 성공만으로 개별 호출 분석의 포함을 가정하지 않는다.
+
+부모 DOM·형제 미디어·상태가 필요하면 실행에 필요한 최소 구성 범위와 해제 책임을 지정한다.
+가짜 ref·noop callback·빈 DOM 또는 임의의 전체 Page 대체로 성공을 만들지 않는다.
+서버 입력이 미확정이면 준비 방법과 미검증 상태를 기록한다.
+추출 단계는 [후속 전달 검증](portable-delivery.md#6-후속-전달-검증-작업)에서 대상과 생성 case를 대조한다.
+이 계약은 분석기 구현이나 제품 동작의 검증 결과를 대신하지 않는다.
 
 ## Ownership and dependency direction
 
