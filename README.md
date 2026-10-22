@@ -1,25 +1,27 @@
 # harness-front
 
-프론트엔드 레퍼런스를 증거 기반으로 분석하고, 독립적인 React/Next.js
-구현과 재사용 가능한 디자인 시스템으로 발전시키기 위한 Codex 스킬
-하네스입니다.
+프런트엔드 레퍼런스를 증거로 분석하고 React + Vite 구현과 재사용 가능한
+디자인 시스템으로 만드는 Codex 스킬 하네스입니다.
+
+배포 버전은 `0.3.0`입니다. 변경 내용과 설치 호환성은
+[v0.3.0 릴리스 안내](docs/releases/0.3.0.md)를 확인하세요.
 
 초기 버전은 공개 사이트의 구조와 동작을 관찰하는 단계부터 원본 런타임
-Oracle, clean-room 구현, 패리티 검증, 실제 두 번째 프로젝트 재사용,
+Oracle, 선택한 모드의 React + Vite 포팅, 패리티 검증, 실제 두 번째 프로젝트 재사용,
 배포 경계 검증까지 하나의 추적 가능한 워크플로로 묶습니다.
 
 ## Included skills
 
 | Skill | Responsibility |
 | --- | --- |
-| `reconstruct-react-reference` | 상위 마일스톤 및 게이트 오케스트레이션 |
-| `site-reference-audit` | 경로별 구조, 반응형, 효과, 기술 신호의 제한된 사전 조사 |
-| `design-system-reference-analyzer` | 승인된 런타임 아카이브와 HTML/CSS/JS 컴포넌트 계약 분석 |
-| `interactive-webgl-analysis-poc` | WebGL, Canvas, shader, scroll/time 인터랙션 분석 및 POC |
-| `web-reference-react-architecture` | scrubbed 증거를 React/TypeScript 구조 계약으로 변환 |
+| `web-reference-workflow` | 상위 마일스톤 및 게이트 오케스트레이션 |
+| `web-reference-site-audit` | 경로별 구조, 반응형, 효과, 기술 신호의 제한된 사전 조사 |
+| `web-reference-design-system-analysis` | 승인된 런타임 아카이브와 HTML/CSS/JS 컴포넌트 계약 분석 |
+| `web-reference-webgl-poc` | WebGL, Canvas, shader, scroll/time 인터랙션 분석 및 POC |
+| `web-reference-react-architecture` | 승인한 증거를 React + Vite 포팅·구조 계약으로 변환 |
 | `web-reference-react-structure` | 승인한 구조 계약을 구현하고 기존 화면과 동작을 검증 |
-| `reference-design-document` | 검증된 구현에서 루트 `DESIGN.md` 생성·검증 |
-| `reference-project-readme` | `DESIGN.md`와 실제 프로젝트를 기준으로 루트 README 작성·검증 |
+| `web-reference-design-doc` | 검증된 구현에서 루트 `DESIGN.md` 생성·검증 |
+| `web-reference-readme` | `DESIGN.md`와 실제 프로젝트를 기준으로 루트 README 작성·검증 |
 | `web-component-motion-capture` | 실제 웹 UI 동작 촬영, 영상/poster 생성과 항목별 검증 |
 
 각 디렉터리에는 해당 스킬의 `SKILL.md`와 기존 `agents/`, `scripts/`,
@@ -44,33 +46,64 @@ cp -R skills/* "${CODEX_HOME:-$HOME/.codex}/skills/"
 다른 런타임 요구사항과 연계 스킬은
 [DEPENDENCIES.md](DEPENDENCIES.md)를 확인하세요.
 
+### v0.3.0 설치 이름 변경
+
+이전 설치가 있으면 사용자 수정본을 먼저 백업하세요.
+아래 이전 디렉터리는 스킬 탐색 경로 밖으로 옮긴 뒤 새 이름을 설치하세요.
+두 이름을 함께 설치하면 같은 책임의 스킬이 중복 표시될 수 있습니다.
+
+- `reconstruct-react-reference` → `web-reference-workflow`
+- `design-system-reference-analyzer` → `web-reference-design-system-analysis`
+- `interactive-webgl-analysis-poc` → `web-reference-webgl-poc`
+- `site-reference-audit` → `web-reference-site-audit`
+- `reference-design-document` → `web-reference-design-doc`
+- `reference-project-readme` → `web-reference-readme`
+
+`web-reference-react-architecture`, `web-reference-react-structure`,
+`web-component-motion-capture`의 설치 이름은 같습니다.
+
+### 목표 스택과 Next.js 포팅
+
+신규 프로젝트와 기존 Next.js 목표 앱은 지정 React + Vite 템플릿을 사용합니다.
+필수 스택은 TypeScript strict, Tailwind CSS, React Router, GSAP, `@gsap/react`입니다.
+기존 Next.js는 이전 입력이며 스택 보존 예외가 아닙니다.
+이미 받은 포팅 승인은 재사용하며 설계·계획을 거쳐 승인한 구현 범위에서 작업합니다.
+
+호스트 `app/`는 라우팅과 외부 연결을 소유하고, `src/`는 휴대용 UI를 담습니다.
+서버 기능·인증·비밀 값은 별도 서버 책임으로 대응하며 브라우저 코드로 옮기지 않습니다.
+원본 Next.js 미러·Oracle은 비교 증거로 보존합니다.
+다른 기존 앱의 작은 수정은 승인한 스택과 구조를 유지합니다.
+
+[공통 포팅 절차](skills/web-reference-react-architecture/references/portable-structure.md#nextjs-to-vite-port)에
+경로·서버 기능 대응, 별도 목적지, clone·충돌 검사와 초기·최종 `npm run check` 기준이 있습니다.
+
 ## 전체 오케스트레이션
 
 ```text
-reconstruct-react-reference
+web-reference-workflow
 │
 ├─ Milestone 1: Original Runtime Oracle
-│  ├─ site-reference-audit
+│  ├─ web-reference-site-audit
 │  │  └─ route·viewport·구조·반응형·이펙트·기술 신호 preflight
 │  ├─ evidence track 선택
 │  │  ├─ behavior-only strict clean-room
 │  │  └─ source-mirror-assisted
-│  ├─ design-system-reference-analyzer
+│  ├─ web-reference-design-system-analysis
 │  │  ├─ 원본 응답 바이트와 manifest-aware replay
 │  │  ├─ 정적·런타임 reference graph
 │  │  └─ HTML/CSS/JS/asset/component contract
-│  ├─ 조건부 interactive-webgl-analysis-poc
+│  ├─ 조건부 web-reference-webgl-poc
 │  │  ├─ renderer-neutral 시각·행동 증거
 │  │  └─ GPU companion trace와 render contract
 │  └─ Oracle lock 및 검증
 │
-├─ Milestone 2: Clean React/Next.js Reconstruction
+├─ Milestone 2: Clean React/Vite Reconstruction
 │  ├─ 기존 target·사용자 feedback correction intake
 │  ├─ scrubbed schema-v2 component-map
 │  ├─ web-reference-react-architecture + desktop signature policy
-│  ├─ 사용자 승인, SHA-256 결합, architecture stage
+│  ├─ 설계 경로·상태 승인, signature SHA-256 결합, architecture stage
 │  ├─ hash-bound implementation plan
-│  ├─ fresh clean implementer의 desktop signature 우선 구현
+│  ├─ source-port 또는 strict-clean-room 경계의 desktop signature 우선 구현
 │  ├─ signature stage 통과 후 나머지 TDD vertical slices
 │  ├─ matched-checkpoint parity + feedback correction loop
 │  └─ promotion 및 component catalog
@@ -81,8 +114,8 @@ reconstruct-react-reference
    ├─ owned/licensed distribution asset profile
    ├─ distribution validation
    └─ Final project documentation
-      ├─ reference-design-document → DESIGN.md
-      └─ reference-project-readme → README.md
+      ├─ web-reference-design-doc → DESIGN.md
+      └─ web-reference-readme → README.md
 ```
 
 ## Milestone 1 — Original Runtime Oracle
@@ -92,7 +125,7 @@ reconstruct-react-reference
 
 ### 1. Scoped reference audit
 
-`site-reference-audit`는 다음을 `observed`, `extracted`, `inferred`,
+`web-reference-site-audit`는 다음을 `observed`, `extracted`, `inferred`,
 `unresolved`로 구분합니다.
 
 - 정확한 URL과 허용된 경로 범위
@@ -116,7 +149,7 @@ reconstruct-react-reference
 
 ### 3. Source and component contracts
 
-`design-system-reference-analyzer`는 승인된 아카이브가 있을 때 다음 관계를
+`web-reference-design-system-analysis`는 승인된 아카이브가 있을 때 다음 관계를
 추적합니다.
 
 ```text
@@ -135,7 +168,7 @@ markup, CSS, JS, 상태, 이벤트, mutation, asset, library와 runtime checkpoi
 ### 4. Conditional GPU gate
 
 Canvas, WebGL/WebGPU, Three.js, shader, framebuffer 또는 render target 신호가
-있으면 `interactive-webgl-analysis-poc`가 시각·행동을 renderer-neutral하게
+있으면 `web-reference-webgl-poc`가 시각·행동을 renderer-neutral하게
 분석합니다. 저수준 WebGL 증명은 DSRA의 pre-navigation runtime probe가
 담당합니다.
 
@@ -163,7 +196,7 @@ Oracle 검증 전에는 metadata-only envelope만 허용됩니다.
 만들 수 없습니다. Oracle과 향후 React target은 서로 중첩되지 않은 별도
 디렉터리와 dependency graph를 가져야 합니다.
 
-## Milestone 2 — Clean React/Next.js reconstruction
+## Milestone 2 — Clean React/Vite reconstruction
 
 Oracle 통과 후 검증된 증거와 기존 target의 mismatch·사용자 feedback를
 claim ID와 checkpoint로 정리한 scrubbed schema-v2 `component-map.json`으로 바꾸고
@@ -173,7 +206,8 @@ claim ID와 checkpoint로 정리한 scrubbed schema-v2 `component-map.json`으�
 
 기본 구조는 `Page → Section → proven UI`입니다.
 
-- Page: route metadata, SEO, locale data, Section 순서
+- Host `app/`: 라우팅·SEO·locale 입력과 외부 연결
+- Page: 호스트 입력을 받아 Section 순서와 페이지 조합 소유
 - Section: content contract, responsive composition, local interaction,
   readiness, fallback, accessibility와 cleanup
 - UI: 두 Section 소비자 또는 명확한 독립 소비 가치가 증명된 경우만 공개
@@ -181,8 +215,8 @@ claim ID와 checkpoint로 정리한 scrubbed schema-v2 `component-map.json`으�
   private
 
 `.reference-reconstruction/react-architecture.md`는 `draft`로 시작하며 에이전트가
-스스로 승인할 수 없습니다. 사용자가 정확한 revision을 승인한 뒤 SHA-256을
-`component-map.json`과 실행 계획에 결합합니다. 폴더, public interface, state
+스스로 승인할 수 없습니다. 사용자가 정확한 revision을 승인한 뒤 설계서의 경로와 승인 상태를
+`component-map.json`과 실행 계획에 기록합니다. 별도 설계서 hash는 요구하지 않습니다. 폴더, public interface, state
 ownership, renderer, dependency budget 또는 parity checkpoint가 실질적으로
 바뀌면 다시 draft와 승인 단계로 돌아갑니다.
 
@@ -194,19 +228,18 @@ hash로 잠깁니다. `--stage architecture` 통과 전에는 계획과 구현�
 
 ### Clean implementation boundary
 
-분석자가 배포된 구현 코드를 조사했다면 clean implementation은 해당 대화
-기록을 갖지 않은 fresh implementer가 수행합니다. 전달 가능한 정보는
-scrubbed 계약, 공개 screenshot, observable checkpoint, semantic content,
-입출력·접근성·fallback 요구사항입니다.
+구현 모드는 설계서와 실행 계획의 Markdown에 기록합니다.
 
-다음은 전달하지 않습니다.
+- `source-port`: 승인한 원본 trace·경로별 source·shader를 읽어 React + Vite 모듈로 포팅합니다.
+  기존 source-aware 구현자를 유지할 수 있으며 독립 저작을 주장하지 않습니다.
+- `strict-clean-room`: 명시한 독립 구현 요구가 있을 때 선택합니다.
+  구현자는 scrubbed 계약·관찰 checkpoint만 받으며 배포 구현을 읽었다면 새 구현자로 교체합니다.
 
-- archived JavaScript/CSS bundle 본문 또는 발췌
-- minified identifier와 복구된 내부 call graph
-- analyzer transcript
-- 명시적인 private resolver 밖의 research-only asset
+두 모드 모두 Oracle과 목표 앱을 분리합니다.
+bundle 전체 삽입, Oracle 경로의 runtime import, iframe 대체로 포팅을 대신하지 않습니다.
+허가한 자산·renderer 소유권과 기존 검증 단계도 유지합니다.
 
-구현은 TDD vertical slice로 진행하고 React/Next.js 판단에는
+구현은 TDD vertical slice로 진행하고 React/Vite 판단에는
 `vercel-react-best-practices`, 관찰 가능한 패리티에는 `webapp-testing`을
 사용합니다.
 
@@ -258,10 +291,10 @@ research-only asset 또는 금지 문자열이 없어야 합니다.
 
 모든 요청된 복원 게이트가 검증된 뒤 문서화를 순서대로 실행합니다.
 
-1. `reference-design-document`
+1. `web-reference-design-doc`
    - 루트 `DESIGN.md`가 없으면 현재 구현과 검증 증거로 생성합니다.
    - 이미 있으면 현재성과 상대 링크를 검증하고, 근거가 있는 노후 계약만 갱신합니다.
-2. `reference-project-readme`
+2. `web-reference-readme`
    - 검증된 `DESIGN.md`를 링크합니다.
    - UI preview, runtime, 폴더 구조, 추출 컴포넌트, 재사용 가이드를 README에 정리합니다.
 
@@ -274,9 +307,9 @@ research-only asset 또는 금지 문자열이 없어야 합니다.
 | Gate | Required result |
 | --- | --- |
 | 1. Oracle closure | 재생 가능한 Oracle과 유효한 hash lock |
-| 2. Component map and architecture | 승인된 architecture·desktop signature policy와 정확한 hash binding |
-| 3. Written plan | architecture·signature hash, correction claim, root owner를 인용한 승인 계획 |
-| 4. Clean implementation | Oracle import·보상 overlay가 없고 signature stage를 통과한 독립 구현 |
+| 2. Component map and architecture | 승인한 설계 경로·상태와 desktop signature policy SHA-256 |
+| 3. Written plan | 설계 경로·signature hash, correction claim, root owner를 인용한 승인 계획 |
+| 4. Clean implementation | 승인한 모드·React/Vite 구조를 따르고 Oracle import·보상 overlay 없이 signature 통과 |
 | 5. Research parity | 최신 binding과 feedback를 포함한 전체 claim receipt |
 | 6. Promotion and catalog | 검증된 public candidate만 포함한 project catalog |
 | 7. Reuse proof | 실제 두 번째 프로젝트의 동일 구현 소비 receipt |
@@ -285,12 +318,12 @@ research-only asset 또는 금지 문자열이 없어야 합니다.
 실행 validator가 제공하는 CLI stage는 여섯 개입니다.
 
 ```bash
-node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage oracle
-node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage architecture
-node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage signature
-node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage promotion
-node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage catalog
-node skills/reconstruct-react-reference/scripts/validate-reconstruction.mjs <target> --stage distribution
+node skills/web-reference-workflow/scripts/validate-reconstruction.mjs <target> --stage oracle
+node skills/web-reference-workflow/scripts/validate-reconstruction.mjs <target> --stage architecture
+node skills/web-reference-workflow/scripts/validate-reconstruction.mjs <target> --stage signature
+node skills/web-reference-workflow/scripts/validate-reconstruction.mjs <target> --stage promotion
+node skills/web-reference-workflow/scripts/validate-reconstruction.mjs <target> --stage catalog
+node skills/web-reference-workflow/scripts/validate-reconstruction.mjs <target> --stage distribution
 ```
 
 계획 승인, clean implementation, reuse proof는 독립적인 workflow gate이며
@@ -345,11 +378,11 @@ receipt와 status는 stale이 되며 다시 검증해야 합니다.
 각 스킬의 독립 테스트는 Node.js 내장 test runner로 실행할 수 있습니다.
 
 ```bash
-node skills/design-system-reference-analyzer/scripts/extract-reference-graph.regression-test.mjs
-node --test skills/design-system-reference-analyzer/scripts/*.test.mjs
-node --test skills/reconstruct-react-reference/scripts/*.test.mjs
-node --test skills/interactive-webgl-analysis-poc/evals/*.test.mjs
-node skills/interactive-webgl-analysis-poc/scripts/test-tools.mjs
+node skills/web-reference-design-system-analysis/scripts/extract-reference-graph.regression-test.mjs
+node --test skills/web-reference-design-system-analysis/scripts/*.test.mjs
+node --test skills/web-reference-workflow/scripts/*.test.mjs
+node --test skills/web-reference-webgl-poc/evals/*.test.mjs
+node skills/web-reference-webgl-poc/scripts/test-tools.mjs
 ```
 
 테스트와 schema 검증은 시각 패리티, 독립 저작, asset 라이선스 또는 법률적

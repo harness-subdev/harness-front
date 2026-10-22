@@ -1,11 +1,12 @@
 # InitPage와 다중 TGZ 전달 계약
 
-신규 복원 프로젝트는 지정 템플릿을 clone하고 구조 검사를 통과해야 한다.
+신규 복원 프로젝트와 Next.js 포팅 목표는 지정 템플릿을 clone하고 구조 검사를 통과해야 한다.
 사이트별 TGZ는 다른 사이트의 UI와 같은 문서에서 조립할 수 있어야 한다.
 이 문서는 architecture의 설계 입력이며 structure의 구현·검증 기준이다.
-기존 앱은 승인한 변경 범위에만 이 계약을 적용한다.
+Next.js가 아닌 기존 앱은 승인한 변경 범위에만 이 계약을 적용한다.
+기존 Next.js 앱은 [포팅 절차](portable-structure.md#nextjs-to-vite-port)를 함께 따른다.
 
-## 1. 신규 프로젝트 시작
+## 1. 신규 프로젝트와 Next.js 포팅 시작
 
 [portable-structure.md](portable-structure.md)의 clone·충돌 확인·추적 파일 복사 절차를 반드시 따른다.
 설계 단계는 템플릿 출처와 구조를 기록한다. 승인된 구현 단계에서 실제 clone을 실행한다.

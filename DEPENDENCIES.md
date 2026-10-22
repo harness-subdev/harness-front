@@ -1,6 +1,6 @@
 # Dependencies
 
-`frontend-harness` itself has no package-manager dependencies. Its bundled
+`harness-front` itself has no package-manager dependencies. Its bundled
 scripts use the Node.js standard library.
 
 ## Runtime requirements
@@ -9,8 +9,10 @@ scripts use the Node.js standard library.
 - Node.js 20 or newer for validators, extractors, and tests
 - A Codex-compatible skill loader
 - A real browser or browser automation surface for live reference inspection
-- An existing React/TypeScript or Next.js project only when reconstruction is
-  requested
+- Access to the designated private React/Vite template for new projects and
+  existing Next.js application ports; Next.js is a migration input, not the target
+- TypeScript strict, Tailwind CSS, React Router, GSAP and `@gsap/react` in that target
+- An existing non-Next.js app keeps its approved stack for scoped behavior changes
 
 ## Required workflow skills
 
@@ -28,14 +30,14 @@ here:
 - `frontend-design` — visual-language analysis and implementation direction
 - `codebase-design` — deep-module boundaries
 - `implement` or `subagent-driven-development` — approved plan execution
-- `vercel-react-best-practices` — React and Next.js decisions
+- `vercel-react-best-practices` — React/Vite implementation decisions
 - `webapp-testing` — observable browser parity
 - `code-review` — implementation review from
   [harness-global](https://github.com/harness-subdev/harness-global)
 
 ## Conditional capabilities
 
-- `interactive-webgl-analysis-poc` is bundled and activates only for relevant
+- `web-reference-webgl-poc` is bundled and activates only for relevant
   Canvas, WebGL, WebGPU, shader, render-target, or scroll-linked evidence.
 - `imagegen` and `algorithmic-art` may provide original replacement assets when
   the request needs them.

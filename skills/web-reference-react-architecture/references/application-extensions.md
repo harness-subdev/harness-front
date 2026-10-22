@@ -31,8 +31,10 @@ Trigger: approved behavior reads/writes remote data. Determine separately whethe
 it needs a client cache. A server-rendered content page or single submission does
 not automatically justify a query library.
 
-1. Preserve the framework and its existing data/mutation conventions. React Router
-   remains host-owned in the React/Vite template; do not add a second router.
+1. For non-Next.js hosts, preserve the framework and its existing data/mutation
+   conventions. For Next.js targets, apply the [React + Vite porting procedure](portable-structure.md#nextjs-to-vite-port)
+   and explicitly map server reads/mutations to an API or chosen server owner.
+   React Router remains host-owned in the React/Vite target; do not add a second router.
 2. Use existing framework facilities or native fetch when sufficient. Shared
    HTTP handling belongs in a small existing client, only when repetition
    justifies it. Define non-success response, cancellation, and parse failures.
@@ -61,7 +63,9 @@ Trigger: approved behavior includes input, validation, and submission. An input
 styled to match a reference does not alone require a form library.
 
 - Start with semantic HTML, labels, native constraints, FormData, and the existing
-  framework submission mechanism for simple forms.
+  framework submission mechanism for simple forms in a preserved host. A Next.js
+  port needs an explicit API/server submission contract; do not move Server
+  Actions or authoritative validation into the browser.
 - Consider React Hook Form for dynamic fields, dirty/touched state, complex
   validation, or multi-step flows that would otherwise require substantial
   bespoke state handling.

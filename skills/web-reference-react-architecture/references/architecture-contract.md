@@ -50,6 +50,12 @@ Record:
 - asset profiles and licensing constraints;
 - public/private module promotion rule.
 
+For an existing Next.js target, apply the [React + Vite porting procedure](portable-structure.md#nextjs-to-vite-port).
+Record Next.js as the source and the designated React/Vite template stack as the
+target. Include existing authorization, route/API mappings, server ownership,
+environment-variable boundaries, unresolved requirements and equivalence checks.
+Do not treat existing Next.js paths or server conventions as target constraints.
+
 For every non-obvious decision include evidence, rationale, and the condition
 that would cause reconsideration.
 
@@ -59,7 +65,7 @@ Read [portable-structure.md](portable-structure.md) and apply its canonical scop
 new or reconstructed target libraries and explicitly approved structural migrations
 use the exact role-first-portable-library v2 target-relative tree. Within that
 scope, an existing tree is the migration baseline, not an alternative layout.
-An existing app's scoped behavior-only refactor preserves its framework, routes,
+An existing non-Next.js app's scoped behavior-only refactor preserves its framework, routes,
 folder layout, styles and public interfaces; apply relevant ownership and reuse
 boundaries without requiring a full migration. This scope applies to standalone
 and parent-driven work alike.
@@ -73,9 +79,10 @@ only directories and exports with a meaningful implementation. Framework routes
 and adapters stay outside the portable library boundary. For a new Vite-template
 target, host `app/` owns them; record its template URL, main branch, stack and
 public paths without pinning a template commit during architecture. For an
-existing host, record and preserve its actual host, route and adapter paths,
-including Next.js Pages Router or `src/app` locations, unless migration of those
-paths is explicitly approved.
+existing non-Next.js host, record and preserve its actual host, route and adapter
+paths unless migration is explicitly approved. For a Next.js port, record Pages
+Router or App Router paths as the baseline and map them to Vite `app/` and React
+Router; do not preserve Next.js route files as the target host.
 
 For every moved implementation, record old/new paths and affected imports,
 public symbol/Props names, local public imports or applicable package exports
@@ -95,7 +102,7 @@ observed geometry and behavior. 구조 이전은 증거를 보존한다. 승인�
 
 ## 3a. 필수 시작·전달 기록
 
-신규 프로젝트는 다음 표를 반드시 채운다. 설계 단계에서는 실행 예정과 완료 근거를 구분한다.
+신규 프로젝트와 Next.js 포팅은 다음 표를 반드시 채운다. 설계 단계에서는 실행 예정과 완료 근거를 구분한다.
 [portable-delivery.md](portable-delivery.md)의 정확한 계약을 적용한다.
 
 | 항목 | 필수 기록 |
@@ -122,7 +129,7 @@ Pages compose Sections and UI. Page-specific implementations and sibling
 Sections do not import each other's private implementation. Reusable
 modules do not import page internals, default site content, framework adapters
 or React Router. Whole-site assembly belongs to the recorded host location,
-which is `app/` in the new Vite template. Preserve the existing host's framework
+which is `app/` in the new Vite template and Next.js port targets. Preserve an existing non-Next.js host's framework
 composition paths. Lower UI roles may compose one another without a fixed
 hierarchy; owner-private access and module cycles remain forbidden. Apply these boundaries
 independently of the module's semantic kind and ownership.
@@ -131,7 +138,8 @@ independently of the module's semantic kind and ownership.
 
 [실행·콘텐츠·예제 연결 계약](portable-structure.md#실행콘텐츠예제-연결-계약)을 적용한다.
 신규 복원과 승인한 구조 이전에서는 아래 기록을 필수로 남긴다.
-기존 앱의 작은 수정은 영향받는 연결만 기록하며 기존 실행 구조를 보존한다.
+Next.js가 아닌 기존 앱의 작은 수정은 영향받는 연결만 기록하며 기존 실행 구조를 보존한다.
+Next.js 포팅은 원본과 React·Vite 목표의 실행·콘텐츠·호스트 연결을 함께 기록한다.
 설계 단계의 예정 경로와 제작 단계에서 확인한 파일을 구분한다.
 
 - 실행 경로: 실제 앱 루트, HTML, bootstrap, App, 공개 entry, Page와 하위 UI.

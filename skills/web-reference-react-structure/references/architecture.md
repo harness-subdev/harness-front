@@ -2,7 +2,7 @@
 
 ## Required source structure and names
 
-New libraries and approved structural migrations follow [portable-structure.md](../../web-reference-react-architecture/references/portable-structure.md), profile `role-first-portable-library`, version 2. Read its exact tree, index, dependency and discovery contracts and the canonical [UI naming vocabulary](../../web-reference-react-architecture/references/ui-naming-vocabulary.md) before implementation. For an existing app's behavior-only refactor, preserve its stack, routes, layout and public interfaces; adoption of a new layout needs an approved structural scope. The following roots describe the portable-library target, not permission to migrate an existing host.
+New libraries and approved structural migrations follow [portable-structure.md](../../web-reference-react-architecture/references/portable-structure.md), profile `role-first-portable-library`, version 2. Read its exact tree, index, dependency and discovery contracts and the canonical [UI naming vocabulary](../../web-reference-react-architecture/references/ui-naming-vocabulary.md) before implementation. For an existing non-Next.js app's behavior-only refactor, preserve its stack, routes, layout and public interfaces; adoption of a new layout needs an approved structural scope. Existing Next.js targets follow the [React + Vite porting procedure](../../web-reference-react-architecture/references/portable-structure.md#nextjs-to-vite-port). Explain the port, reuse existing authorization and implement its approved architecture and plan. The following roots describe the portable-library target, not permission to silently migrate an existing host.
 
 - The portable source root contains only `pages`, `sections`, `components`, `elements`, `interactions` implementation directories plus `exports/`, whose `<page-key>.ts` / `common.ts` files contain named public re-exports only. The `exports/` directory is an interface directory, not a sixth implementation role. Use the reference site's actual page implementation keys, not a fixed home/works list. Create only directories and public entries with a real responsibility.
 - Only `pages` and `sections` contain page-key or optional `common/` implementations. `components`, `elements`, and `interactions` contain named modules directly, without page/common subdivisions. Page ownership and reuse do not change those paths. Do not create root `common`, `features`, `shared` or nested `pages/home/sections` trees. Framework routes/adapters stay in the host application outside this source root. 콘텐츠 자산과 문서 CSS는 호스트가 소유한다. `styles/portable.css`와 필수 자산도 src 역할 디렉터리 밖의 전달 경계를 따른다. Small UI-owned icons may be imported beside the owner or written as inline SVG. Logical separation does not require a separate npm package or `packages/` directory; a single project with host `app/` and portable `src/` is valid.
@@ -42,7 +42,7 @@ Availability and fixture success do not grant promotion. In the reconstruction w
 
 ## 필수 초기화·전달 계약
 
-신규 프로젝트는 [portable-delivery.md](../../web-reference-react-architecture/references/portable-delivery.md)를 반드시 읽고 적용한다.
+신규 프로젝트와 Next.js 포팅은 [portable-delivery.md](../../web-reference-react-architecture/references/portable-delivery.md)를 반드시 읽고 적용한다.
 InitPage는 Page이며 호스트가 readiness·오류·재시도·목적 URL을 관리한다.
 portable CSS·필수 자산·포인터·variation·혼합 TGZ와 소스 ZIP 검증은 같은 문서의 기준을 따른다.
 승인한 동작 수정은 문제·수정 이유·기대 결과를 기록하고 검증한다. 기존 동작 보존이 수정 지시를 막지 않는다.

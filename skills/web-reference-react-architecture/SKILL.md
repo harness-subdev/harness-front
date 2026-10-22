@@ -1,6 +1,6 @@
 ---
 name: web-reference-react-architecture
-description: Use when approved public-site reference evidence needs a React and TypeScript architecture before reconstruction, including consistent role-first folders, UI names, public entry points, discovery and reuse contracts. Architecture only; not application implementation or catalog search UI.
+description: Use when approved public-site reference evidence needs a React and TypeScript architecture before reconstruction, including existing Next.js targets that need React + Vite porting guidance, role-first folders, public entries and reuse contracts. Architecture only; not application implementation or catalog search UI.
 ---
 
 # Web Reference React Architecture
@@ -23,11 +23,14 @@ Before designing paths or naming modules, read:
   preferred names, definitions, aliases and semantic boundaries.
 
 Use this structure for new or reconstructed target libraries and explicitly
-approved structural migrations. For an existing app's scoped behavior-only
+approved structural migrations. For an existing non-Next.js app's scoped behavior-only
 refactor, preserve its framework, routes, folder layout, styles and public
 interfaces; apply the relevant ownership and reuse boundaries without implying
 a full migration. Within an approved structural migration, an older
 page-first/features/shared tree is migration input, not an alternative target.
+Existing Next.js targets follow the [React + Vite porting procedure](references/portable-structure.md#nextjs-to-vite-port)
+instead of the existing-stack preservation rule. Explain the port and include its
+scope in the architecture; preserve the user's existing port authorization.
 Record paths/names/exports/build transitions. Preserve behavior outside the explicitly approved change; review and correct behavior within that scope. Do not
 silently migrate or reapprove existing applications merely because this skill changed.
 The skill prepares consistent discovery data;
@@ -53,7 +56,7 @@ Start from a scoped evidence packet containing:
 - the target repository's existing framework and conventions when it exists.
 
 When invoked for reconstruction, follow the implementation mode selected by
-[web-reference-workflow's implementation boundary](../reconstruct-react-reference/references/implementation-boundary.md).
+[web-reference-workflow's implementation boundary](../web-reference-workflow/references/implementation-boundary.md).
 Record the mode, its authorization or governing requirement, packet path and
 implementer source-exposure boundary in architecture Markdown, not new JSON fields.
 For `source-port`, the architecture author may inspect the approved source trace
@@ -71,7 +74,9 @@ provisional in-response structure and list what remains blocked.
 New projects use the private React/Vite template defined in portable-structure.md.
 Record its source, roots, stack and public paths in the packet; do not select or pin
 a commit, clone the application, install dependencies or create target files during architecture.
-Existing projects preserve their selected stack and require an approved migration scope.
+Existing non-Next.js projects preserve their selected stack unless migration is
+approved. Existing Next.js projects use the same React/Vite template as the target;
+record the source stack, port scope and unresolved server requirements separately.
 
 ## Outcome
 
@@ -117,16 +122,20 @@ architecture packet. Stay within this skill's architecture-only scope.
 
 ## Architecture method
 
-### 1. Preserve the target stack
+### 1. Select the target stack
 
-Follow an existing React/TypeScript repository's framework, router, styling and
+Follow an existing non-Next.js React/TypeScript repository's framework, router, styling and
 test conventions within the required structure and vocabulary. For a new target,
 use React, Vite, TypeScript strict, Tailwind CSS, React Router, GSAP and @gsap/react
 from the designated template. Budget any additional runtime dependency from evidence.
+For an existing Next.js target, read the canonical porting procedure before
+designing paths. Plan React + Vite, TypeScript strict, Tailwind CSS, React Router,
+GSAP and @gsap/react; Next.js is the migration input, not a target-stack exception.
+This skill designs and hands off the port; it does not clone or change the app.
 
 Use the same role-first contract in standalone and parent-driven architecture.
 For the Vite template, keep routes/adapters in host `app/`, outside portable `src/`.
-Existing hosts retain their framework's routing/adapters and approved layout; keep
+Existing non-Next.js hosts retain their framework's routing/adapters and approved layout; keep
 framework dependencies outside any portable library boundary. Record profile/version, vocabulary
 version, actual page keys, application/library roots and project policy sources.
 Preserve the parent's portability and Tailwind rules within those roots. Logical
@@ -148,7 +157,8 @@ smaller equivalent implementation.
 설계 전에 [실행·콘텐츠·예제 연결 계약](references/portable-structure.md#실행콘텐츠예제-연결-계약)을 적용한다.
 [설계서의 실행·예제 연결 기록](references/architecture-contract.md#3c-실행예제-연결-기록)을 채운다.
 신규 복원과 승인한 구조 이전은 React·Vite 목표의 `app/main.tsx → App → 공개 Page` 연결을 설계한다.
-기존 앱의 작은 수정은 승인한 호스트·경로를 보존한다.
+Next.js가 아닌 기존 앱의 작은 수정은 승인한 호스트·경로를 보존한다.
+기존 Next.js 앱은 포팅 절차에 따라 React·Vite 실행 경로와 React Router 연결을 설계한다.
 
 ### 2. Define deep modules
 
@@ -299,11 +309,12 @@ it as an independently chosen requirement rather than observed reference behavio
 
 For new or reconstructed target libraries and approved structural migrations, an
 architecture packet is ready for approval only when the following checks pass.
-A scoped behavior-only refactor applies relevant ownership, interface, reuse and
+A scoped behavior-only refactor of a non-Next.js app applies relevant ownership, interface, reuse and
 verification checks while preserving its existing host/layout; these checks do
 not authorize structural migration.
 
-- 신규 프로젝트의 template clone·초기/최종 `npm run check`를 필수 구현 단계로 지정한다;
+- 신규 프로젝트와 Next.js 포팅의 template clone·초기/최종 `npm run check`를 필수 구현 단계로 지정한다;
+- Next.js 포팅은 경로·전용 API·서버 기능의 대응 방식과 미해결 차단 조건을 기록한다;
 - InitPage의 준비·실패·재시도·완료·해제와 호스트 소유권을 명시한다;
 - portable CSS·자산·모션·variation 경계와 실제 두 TGZ 후속 검증 작업을 기록한다;
 - 실행·예제 연결 기록에 실제 콘텐츠·호스트 소유자·분석 입력·대상별 호출부와 미확정 조건을 명시한다;
