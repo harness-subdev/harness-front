@@ -1,7 +1,7 @@
 # Dependencies
 
 `harness-front` itself has no package-manager dependencies. Its bundled
-scripts use the Node.js standard library.
+JavaScript scripts use the Node.js standard library. The UI delivery helper uses the Python standard library.
 
 ## Runtime requirements
 
@@ -65,3 +65,18 @@ The skills can detect or reason about libraries used by a target website, such
 as GSAP, ScrollTrigger, Lenis, Framer Motion, Three.js, React Three Fiber,
 Swiper, or p5.js. They are observations or optional target-project choices and
 are not dependencies of this repository.
+
+## UI mockup requirements
+
+- `web-ui-mockup` needs a connected Chrome surface to inspect rendered HTML and images.
+- Its delivery recording helper needs Python 3.10 or newer and a POSIX runtime
+  providing `fcntl` and selectable stdin. It adds no pip dependencies.
+- Installing the skill does not install or change Codex hooks. The bundled helper
+  can be configured separately; without a hook, follow the documented manual handoff.
+- The supplied HTML is the preview shell. Adapt its project-specific paths and
+  same-origin controls to the actual target; the original page content/server is absent.
+- Package registration uses the host's existing `wrapper-packages` repository and
+  its project skills. Confirm the actual host paths and availability before that step.
+- `prototype` is supplied by `harness-global`; version `v2.0.2` or newer applies
+  the same full-page template. Install both repositories' skills in one skill directory
+  so the relative reference resolves.

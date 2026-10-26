@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>studio. — 페이지 전환 미리보기</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --blue: #006dd6;
+        --line: #dce5ee;
+        --pale: #eef5fd;
+        font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #fff;
+        color: #222b35;
+      }
+
+      button, a {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:focus-visible, a:focus-visible {
+        outline: 3px solid var(--blue);
+        outline-offset: 3px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 230px minmax(0, 1fr);
+        width: 100%;
+        height: 100svh;
+      }
+
+      .sidebar {
+        height: 100svh;
+        padding: 22px 16px;
+        overflow-y: auto;
+        border-right: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .sidebar h1 {
+        margin: 0 0 20px;
+        color: var(--blue);
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -.035em;
+      }
+
+      .page-links, .preview-actions {
+        display: grid;
+        gap: 7px;
+      }
+
+      .route-button, .preview-action {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 13px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: #fff;
+        color: #222b35;
+        font-size: 13px;
+        line-height: 1.4;
+        text-align: left;
+        text-decoration: none;
+      }
+
+      .route-button:hover, .preview-action:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+
+      .route-button[aria-current="page"] {
+        border-color: var(--blue);
+        background: var(--pale);
+        color: var(--blue);
+      }
+
+      .preview-actions {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+      }
+
+      .preview-action {
+        color: var(--blue);
+      }
+
+      .preview {
+        min-width: 0;
+        min-height: 0;
+        height: 100%;
+      }
+
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #fff;
+      }
+
+      .panel-toggle {
+        display: none;
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        z-index: 40;
+        min-height: 42px;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: #fff;
+        color: var(--blue);
+        font-size: 12px;
+      }
+
+      @media (max-width: 900px) {
+        .workspace {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .sidebar {
+          position: fixed;
+          inset: 0 auto 0 0;
+          z-index: 30;
+          width: min(270px, calc(100vw - 40px));
+          padding-top: 76px;
+          box-shadow: 8px 0 24px rgb(0 0 0 / 8%);
+          transform: translateX(-110%);
+        }
+
+        .sidebar[data-open="true"] {
+          transform: translateX(0);
+        }
+
+        .panel-toggle {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="panel-toggle" id="panel-toggle" type="button" aria-controls="page-controls" aria-expanded="false">이동·시안</button>
+    <main class="workspace">
+      <aside class="sidebar" id="page-controls" data-open="false" aria-label="페이지 이동 도구">
+        <h1>페이지 이동</h1>
+        <nav class="page-links" aria-label="미리보기 페이지">
+          <button class="route-button" type="button" data-route="/" aria-current="page">메인</button>
+          <button class="route-button" type="button" data-route="/styles/brand">Brand목록</button>
+          <button class="route-button" type="button" data-route="/styles/space">Space목록</button>
+          <button class="route-button" type="button" data-route="/styles/archive">Archive목록</button>
+          <button class="route-button" type="button" data-route="/services">제작안내</button>
+          <button class="route-button" type="button" data-route="/works">작업사례</button>
+          <button class="route-button" type="button" data-route="/about">소개</button>
+          <button class="route-button" type="button" data-jump="brand">메인전환체험</button>
+        </nav>
+        <div class="preview-actions">
+          <button class="preview-action" id="replay" type="button">다시 재생</button>
+          <a class="preview-action" href="./?demo=1&amp;embed=1" target="_blank" rel="noopener noreferrer">전체 미리보기 ↗</a>
+        </div>
+      </aside>
+      <section class="preview" aria-label="페이지 전환 미리보기">
+        <iframe id="transition-preview" title="초점 맞춤 페이지 전환 미리보기" src="./?demo=1&amp;embed=1" allow="autoplay; fullscreen"></iframe>
+      </section>
+    </main>
+    <script>
+      const preview = document.querySelector("#transition-preview");
+      const sidebar = document.querySelector("#page-controls");
+      const panelToggle = document.querySelector("#panel-toggle");
+      const pageButtons = sidebar.querySelectorAll(".route-button");
+      const mobileScreen = window.matchMedia("(max-width: 900px)");
+
+      function setPanelOpen(open) {
+        sidebar.dataset.open = String(open);
+        sidebar.inert = mobileScreen.matches && !open;
+        panelToggle.setAttribute("aria-expanded", String(open));
+      }
+
+      function closePanel() {
+        if (mobileScreen.matches) {
+          setPanelOpen(false);
+          panelToggle.focus();
+        }
+      }
+
+      for (const button of pageButtons) {
+        button.addEventListener("click", () => {
+          const selector = button.dataset.route
+            ? `.review-toolbar [data-route="${button.dataset.route}"]`
+            : `.review-toolbar [data-jump="${button.dataset.jump}"]`;
+          const innerButton = preview.contentDocument?.querySelector(selector);
+          if (!innerButton) return;
+
+          innerButton.click();
+          for (const pageButton of pageButtons) {
+            pageButton.removeAttribute("aria-current");
+          }
+          if (button.dataset.route) button.setAttribute("aria-current", "page");
+          closePanel();
+        });
+      }
+
+      document.querySelector("#replay").addEventListener("click", () => {
+        preview.src = "./?demo=1&embed=1";
+        for (const button of pageButtons) {
+          button.removeAttribute("aria-current");
+        }
+        sidebar.querySelector('[data-route="/"]').setAttribute("aria-current", "page");
+        closePanel();
+      });
+
+      panelToggle.addEventListener("click", () => {
+        setPanelOpen(sidebar.dataset.open !== "true");
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closePanel();
+      });
+      mobileScreen.addEventListener("change", () => setPanelOpen(false));
+      setPanelOpen(false);
+    </script>
+  </body>
+</html>

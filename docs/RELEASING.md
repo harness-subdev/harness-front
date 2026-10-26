@@ -5,13 +5,13 @@
 
 ## 빌드
 
-Git, Node.js 24, Bash, tar, shasum을 준비하고 변경 사항을 커밋한 뒤 실행합니다.
+Git, Node.js 24, Python 3.10 이상, Bash, tar, shasum을 준비하고 변경 사항을 커밋한 뒤 실행합니다.
 
 ```bash
 bash scripts/build.sh
 ```
 
-커밋된 전체 소스를 `git archive`로 꺼내 README의 모든 Node 테스트를 실행합니다.
+커밋된 전체 소스를 `git archive`로 꺼내 README의 Node 검사와 `web-ui-mockup`의 Python 검사를 실행합니다.
 스킬 정의를 확인하고 `build-info.json`을 추가하여 `dist/`에 tar.gz와 SHA-256을
 생성합니다. 압축 해제 후 스킬 파일 일치와 체크섬도 검사합니다. Git이 추적하는
 숨김 파일과 fixture가 포함되며 미추적 파일과 로컬 비밀 파일은 포함되지 않습니다.
