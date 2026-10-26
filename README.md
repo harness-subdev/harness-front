@@ -1,10 +1,10 @@
 # harness-front
 
 프런트엔드 레퍼런스를 증거로 분석하고 React + Vite 구현과 재사용 가능한
-디자인 시스템으로 만드는 Codex 스킬 하네스입니다.
+디자인 시스템으로 만드는 Codex 스킬 하네스입니다. 전체 페이지와 부분 UI의 목업도 만듭니다.
 
-배포 버전은 `0.3.0`입니다. 변경 내용과 설치 호환성은
-[v0.3.0 릴리스 안내](docs/releases/0.3.0.md)를 확인하세요.
+배포 버전은 `0.4.0`입니다. 변경 내용과 설치 호환성은
+[v0.4.0 릴리스 안내](docs/releases/0.4.0.md)를 확인하세요.
 
 초기 버전은 공개 사이트의 구조와 동작을 관찰하는 단계부터 원본 런타임
 Oracle, 선택한 모드의 React + Vite 포팅, 패리티 검증, 실제 두 번째 프로젝트 재사용,
@@ -23,6 +23,7 @@ Oracle, 선택한 모드의 React + Vite 포팅, 패리티 검증, 실제 두 �
 | `web-reference-design-doc` | 검증된 구현에서 루트 `DESIGN.md` 생성·검증 |
 | `web-reference-readme` | `DESIGN.md`와 실제 프로젝트를 기준으로 루트 README 작성·검증 |
 | `web-component-motion-capture` | 실제 웹 UI 동작 촬영, 영상/poster 생성과 항목별 검증 |
+| `web-ui-mockup` | 전체 페이지·페이지 전환은 패널형 HTML로, 부분 UI는 이미지로 제작·검수 |
 
 각 디렉터리에는 해당 스킬의 `SKILL.md`와 기존 `agents/`, `scripts/`,
 `reference(s)/`, `evals/` 리소스가 함께 들어 있습니다.
@@ -45,6 +46,17 @@ cp -R skills/* "${CODEX_HOME:-$HOME/.codex}/skills/"
 
 다른 런타임 요구사항과 연계 스킬은
 [DEPENDENCIES.md](DEPENDENCIES.md)를 확인하세요.
+
+### 전체 화면 목업
+
+페이지 전체나 페이지 전환을 보여주는 시안은 `web-ui-mockup`을 사용합니다.
+왼쪽 조작 패널에서 페이지·후보를 고르고 오른쪽 전체 높이 미리보기에서 하나씩 확인합니다.
+페이지 전환 목업에는 직접 실행할 이동과 다시 재생 기능을 둡니다.
+부분 UI 목업은 기존 이미지 방식을 유지하며 사용자가 지정한 형식을 우선합니다.
+
+[전체 화면 목업 템플릿](skills/web-ui-mockup/references/full-page-preview.md)과
+보관한 원본 HTML을 함께 제공합니다. 원본 페이지 콘텐츠나 서버는 포함하지 않습니다.
+`prototype`의 같은 조건에도 적용하려면 `harness-global`의 `v2.0.2` 이상을 함께 설치합니다.
 
 ### v0.3.0 설치 이름 변경
 

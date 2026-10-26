@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web UI Mockup"
+  short_description: "전체 화면은 패널형 HTML로, 부분 UI는 이미지로 만드는 목업"
+  default_prompt: "$web-ui-mockup을 사용해 목업을 만들어줘. 전체 화면이나 페이지 전환이면 전체 화면 목업 템플릿을 적용하고, 부분 UI면 이미지로 보여줘. 구현 전에 승인을 받아줘."
