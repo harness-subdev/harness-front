@@ -1,0 +1,4 @@
+interface:
+  display_name: "웹 영상·애니메이션 성능 점검"
+  short_description: "기존 화면을 유지하며 반복되는 영상·애니메이션 지연을 줄입니다"
+  default_prompt: "$web-motion-performance 기존 UI를 유지하면서 반복되는 영상·애니메이션 병목을 측정하고 필요한 부분만 수정해줘."

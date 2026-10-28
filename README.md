@@ -23,6 +23,7 @@ Oracle, 선택한 모드의 React + Vite 포팅, 패리티 검증, 실제 두 �
 | `web-reference-design-doc` | 검증된 구현에서 루트 `DESIGN.md` 생성·검증 |
 | `web-reference-readme` | `DESIGN.md`와 실제 프로젝트를 기준으로 루트 README 작성·검증 |
 | `web-component-motion-capture` | 실제 웹 UI 동작 촬영, 영상/poster 생성과 항목별 검증 |
+| `web-motion-performance` | 기존 UI를 유지하며 반복되는 영상·애니메이션 병목을 측정하고 수정 |
 | `web-ui-mockup` | 전체 페이지·페이지 전환은 패널형 HTML로, 부분 UI는 이미지로 제작·검수 |
 
 각 디렉터리에는 해당 스킬의 `SKILL.md`와 기존 `agents/`, `scripts/`,
