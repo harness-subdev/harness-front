@@ -66,6 +66,7 @@ Do not:
    - Confirm the reference URL or source files, including markup/templates, stylesheets, scripts/modules, assets, and external libraries.
    - If only one artifact is provided, state which related CSS, JS, assets, or runtime behavior are missing and what assumptions are being made.
    - Select and record `source-mirror-assisted` or `behavior-only` before any retrieval: include its authority/retrieval basis. In `behavior-only`, do not fetch or retrieve artifacts; state unavailable or unauthorized classes and limit claims to observed behavior.
+   - For Framer pages or image, font, and SVG asset analysis, read [Framer and asset inspection](reference/framer-and-assets.md) before observation or authorized capture. Apply its capture checks only in `source-mirror-assisted` mode; keep the existing archive, graph, and runtime gates.
    - Only in `source-mirror-assisted` mode, retrieve authorized public artifacts and save served HTML plus discoverable linked/runtime assets before using screenshots or descriptions as source evidence.
    - Identify HTML/CSS/JS, assets, external libraries, event listeners, render loops, and runtime assumptions.
    - Treat IDs, classes, `data-*` attributes, ARIA attributes, CSS custom properties, and JS query selectors as potential component contracts.
